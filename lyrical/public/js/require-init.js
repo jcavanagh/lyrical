@@ -9,8 +9,7 @@ require.config({
         underscore: 'lib/underscore.min',
         bootstrap: 'lib/bootstrap.min',
         angular: 'lib/angular',
-        angularRoute: 'lib/angular-route',
-        lyrical: 'lyrical'
+        angularRoute: 'lib/angular-route'
     },
     shim: {
         angular: { exports: 'angular' },

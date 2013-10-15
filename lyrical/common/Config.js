@@ -25,7 +25,7 @@ define(['fs', 'path'], function(fs, path) {
         //Load config
         this.readConfig(function() {
             //Watch config file
-            fs.watch(configPath, this.onConfigChanged.bind(this));
+            fs.watchFile(configPath, this.onConfigChanged.bind(this));
         });
     };
 
@@ -79,14 +79,12 @@ define(['fs', 'path'], function(fs, path) {
         /**
          * Event handler for fs.watch.  Reloads configuration.
          * 
-         * @param {String} event Event (change/rename)
-         * @param {String} filename The changed filename
+         * @param {String} current Current stat
+         * @param {String} prev Previous stat
          */
-        ,onConfigChanged: function(event, filename) {
-            if(event === 'change') {
-                console.log('Reloading configuration...');
-                this.readConfig();
-            }
+        ,onConfigChanged: function(current, previous) {
+            console.log('Reloading configuration...');
+            this.readConfig();
         }
 
         /**

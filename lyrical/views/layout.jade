@@ -9,6 +9,10 @@ html
     link(rel='stylesheet', href='/css/bootstrap.min.css')
 
     script(type='text/javascript', src='js/lib/require.js')
-    script(type='text/javascript', src='js/require-init.js')
+
+    if developmentMode
+        script(type='text/javascript', src='js/require-init.js')
+    else
+        script(type='text/javascript', src='js/lyrical.min.js')
   body
     block content

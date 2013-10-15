@@ -5,7 +5,9 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * 
  * @author Joe Cavanagh
  **/
-define([], function() {
+define([
+    'common/Config'
+], function(Config) {
     'use strict';
 
     return {
@@ -13,7 +15,10 @@ define([], function() {
          * GET /
          */
         index: function(req, res) {
-            res.render('index', { title: 'Express' });
+            console.log(Config.get('developmentMode'));
+            res.render('index', { 
+                developmentMode: Config.get('developmentMode')
+            });
         }
     };
 });
