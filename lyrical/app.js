@@ -11,7 +11,7 @@ define([
     ,'events'
     ,'express'
     ,'http'
-    ,'routes/index'
+    ,'controllers/index'
     ,'path'
     ,'underscore.string'
 ], function(
@@ -28,7 +28,7 @@ define([
 
     var app = express();
 
-    //Set app parameters
+    //Set app middleware
     app.set('views', __dirname + '/views');
     app.set('view engine', 'jade');
     app.use(express.favicon());
@@ -50,8 +50,6 @@ define([
 
     //Set routes
     app.get('/', index.index);
-    app.get('/l', index.lyric);
-    app.get('/s', index.set);
 
     //Wait for config
     Config.onConfigLoaded(function() {

@@ -1,2 +1,3 @@
 node_modules
 sequelize/config/config.json
+.sass-cache
