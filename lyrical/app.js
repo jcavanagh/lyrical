@@ -1,8 +1,3 @@
-//Set node path before anything
-process.env['NODE_PATH'] = __dirname;
-
-console.log(process.env);
-
 if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 /**
@@ -15,7 +10,6 @@ define([
     ,'common/Config'
     ,'events'
     ,'express'
-    ,'mtg/GameMgr'
     ,'http'
     ,'routes/index'
     ,'path'
@@ -25,14 +19,11 @@ define([
     ,Config
     ,events
     ,express
-    ,GameMgr
     ,http
     ,index
     ,path
     ,underscoreStr
 ) {
-    'use strict';
-
     var app = express();
 
     //Set app parameters

@@ -26,7 +26,7 @@ define([], function() {
         /**
          * GET a set of lyrics
          */
-        ,lyric: function(req, res) {
+        ,set: function(req, res) {
             res.render('set', {});
         }
     };
