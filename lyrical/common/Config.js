@@ -6,26 +6,41 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @class common.Config
  * @author Joe Cavanagh
  */
-define(['fs', 'path'], function(fs, path) {
+define([
+    'underscore',
+    'fs',
+    'path'
+], function(_, fs, path) {
     'use strict';
     
-    var CONFIG_PATH = path.join(__dirname, '..', 'config.json');
+    var CONFIG_PATH = path.join(__dirname, '..', 'config.json')
+        ,ORM_CONFIG_PATH = path.join(__dirname, '..', 'orm', 'config', 'config.json');
 
     /**
      * Constructs a Config object
      * 
      * @method
-     * @param {String} configPath Path to config.json
+     * @param {Object} configPaths Map of configuration key to filename
      */
-    var Config = function(configPath) {
-        this.configPath = configPath;
+    var Config = function(configPaths) {
+        //Sanitize
+        if(!_.isObject(configPaths)) {
+            console.error('Cannot load config: Malformed paths');
+            return;
+        }
+
+        //Stash config paths
+        this.configPaths = configPaths;
+
         this.configLoaded = false;
         this.configLoadedListeners = [];
 
         //Load config
         this.readConfig(function() {
             //Watch config file
-            fs.watchFile(configPath, this.onConfigChanged.bind(this));
+            _.each(this.configPaths, function(path) {
+                fs.watchFile(path, this.onConfigChanged.bind(this));
+            }, this);
         });
     };
 
@@ -131,34 +146,47 @@ define(['fs', 'path'], function(fs, path) {
         ,readConfig: function(callback) {
             //Get file handle, read, and parse
             var me = this;
-            fs.readFile(me.configPath, function(err, data) {
-                if(err) {
-                    console.error('Error loading config:');
-                    console.error(err);
-                    return;
-                }
 
-                //Load config
-                try {
-                    me.config = JSON.parse(data.toString());
+            me.config = {};
 
-                    //Fire initial load
-                    if(!me.configLoaded) {
-                        me.configLoaded = true;
-                        me.onConfigLoaded();
+            _.each(_.pairs(me.configPaths), function(kv, index, list) {
+                var key = kv[0],
+                    path = kv[1];
+
+                fs.readFile(path, function(err, data) {
+                    if(err) {
+                        console.error('Error loading config:');
+                        console.error(err);
+                        return;
                     }
-                } catch(e) {
-                    console.error('Failed to parse config file!  Please make sure it is valid JSON.');
-                    console.error(e);
-                }
 
-                //Execute callback
-                if(callback && typeof callback === 'function') {
-                    callback.apply(me);
-                }
+                    //Load config
+                    try {
+                        me.config[key] = JSON.parse(data.toString());
+
+                        //Fire initial load
+                        if(index == list.length - 1) {
+                            if(!me.configLoaded) {
+                                me.configLoaded = true;
+                                me.onConfigLoaded();
+                            }
+                        }
+                    } catch(e) {
+                        console.error('Failed to parse config file:', path);
+                        console.error(e);
+                    }
+
+                    //Execute callback
+                    if(callback && typeof callback === 'function') {
+                        callback.apply(me);
+                    }
+                });
             });
         }
     };
 
-    return new Config(CONFIG_PATH);
+    return new Config({
+        lyrical: CONFIG_PATH,
+        orm: ORM_CONFIG_PATH
+    });
 });

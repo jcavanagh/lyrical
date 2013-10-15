@@ -12,6 +12,7 @@ define([
     ,'express'
     ,'http'
     ,'controllers/index'
+    ,'common/ModelLoader'
     ,'path'
     ,'underscore.string'
 ], function(
@@ -21,6 +22,7 @@ define([
     ,express
     ,http
     ,index
+    ,ModelLoader
     ,path
     ,underscoreStr
 ) {
@@ -38,11 +40,6 @@ define([
     app.use(app.router);
     app.use(express.static(path.join(__dirname, 'public')));
 
-    // development only
-    if ('development' == app.get('env')) {
-        app.use(express.errorHandler());
-    }
-
     //Underscore extensions
     _.str = underscoreStr;
     _.str.include('Underscore.string', 'string');
@@ -53,11 +50,20 @@ define([
 
     //Wait for config
     Config.onConfigLoaded(function() {
-        app.set('port', Config.get('server.port') || 3002);
+        //Set development error handler
+        if (Config.get('lyrical.developmentMode')) {
+            app.use(express.errorHandler());
+        }
 
-        //Start server
-        http.createServer(app).listen(app.get('port'), function(){
-            console.log('Express server listening on port ' + app.get('port'));
+        //Set server port
+        app.set('port', Config.get('lyrical.server.port') || 3002);
+
+        //Load models
+        ModelLoader.loadAll(function() {
+            //Start server
+            http.createServer(app).listen(app.get('port'), function(){
+                console.log('Express server listening on port ' + app.get('port'));
+            });
         });
     }, this);
 

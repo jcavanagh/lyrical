@@ -15,9 +15,8 @@ define([
          * GET /
          */
         index: function(req, res) {
-            console.log(Config.get('developmentMode'));
             res.render('index', { 
-                developmentMode: Config.get('developmentMode')
+                developmentMode: Config.get('lyrical.developmentMode')
             });
         }
     };
