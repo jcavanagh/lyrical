@@ -3,20 +3,20 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 //Setup Require
 require.config({
-    baseUrl: '/js/lyrical',
+    baseUrl: '/js',
     paths: {
-        jquery: '//code.jquery.com/jquery.min',
-        underscore: '/lib/underscore.min',
-        bootstrap: '/lib/bootstrap.min',
-        angular: '//ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.2/angular',
-        angularRoute: '//code.angularjs.org/1.2.0-rc.2/angular-route',
-        lyrical: '/js/lyrical'
-    }
-    ,shim: {
+        jquery: 'lib/jquery.min',
+        underscore: 'lib/underscore.min',
+        bootstrap: 'lib/bootstrap.min',
+        angular: 'lib/angular',
+        angularRoute: 'lib/angular-route',
+        lyrical: 'lyrical'
+    },
+    shim: {
         angular: { exports: 'angular' },
         angularRoute: [ 'angular' ]
-    }
-    ,priority: [
+    },
+    priority: [
         'angular'
     ]
 });
@@ -27,15 +27,14 @@ window.name = 'NG_DEFER_BOOTSTRAP';
 //Bootstrap Angular
 require([
     'angular',
-    'lyrical',
-    'routes'
-], function(angular, lyrical, routes) {
+    'lyrical'
+], function(angular, lyrical) {
     'use strict';
 
     var $html = angular.element(document.getElementsByTagName('html')[0]);
 
     angular.element().ready(function() {
         $html.addClass('ng-app');
-        angular.bootstrap($html, [lyrical['name']]);
+        angular.bootstrap($html, [lyrical.name]);
     });
 });

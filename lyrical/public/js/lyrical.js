@@ -1,10 +1,10 @@
 define([
     'angular',
     'angularRoute',
-    'controllers',
-    'directives',
-    'filters',
-    'services'
+    'lyrical/controllers',
+    'lyrical/directives',
+    'lyrical/filters',
+    'lyrical/services'
 ], function (angular, angularRoute, controllers, directives, filters, services) {
     'use strict';
 
