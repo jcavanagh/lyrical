@@ -24,6 +24,8 @@ define([
     ,path
     ,underscoreStr
 ) {
+    'use strict';
+
     var app = express();
 
     //Set app parameters
@@ -45,10 +47,6 @@ define([
     _.str = underscoreStr;
     _.str.include('Underscore.string', 'string');
     _.emptyFn = function() {};
-
-    //All objects inherit from EventEmitter
-    //FIXME: Not sure if this is insane or not, pretty sure it's just awesome
-    Object.prototype = _.extend(Object.prototype, events.EventEmitter.prototype);
 
     //Set routes
     app.get('/', index.index);
