@@ -92,6 +92,13 @@ define([
         }
 
         /**
+         * Returns all configuration
+         */
+        ,getAll: function() {
+            return this.config;
+        }
+
+        /**
          * Event handler for fs.watch.  Reloads configuration.
          * 
          * @param {String} current Current stat

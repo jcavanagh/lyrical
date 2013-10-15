@@ -6,25 +6,27 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @author Joe Cavanagh
  */
 define([
-    'underscore'
-    ,'common/Config'
-    ,'events'
-    ,'express'
-    ,'http'
-    ,'controllers/index'
-    ,'common/ModelLoader'
-    ,'path'
-    ,'underscore.string'
+    'require',
+    'underscore',
+    'common/Config',
+    'events',
+    'express',
+    'http',
+    'controllers/index',
+    'common/ModelLoader',
+    'path',
+    'underscore.string'
 ], function(
-    _
-    ,Config
-    ,events
-    ,express
-    ,http
-    ,index
-    ,ModelLoader
-    ,path
-    ,underscoreStr
+    require,
+    _,
+    Config,
+    events,
+    express,
+    http,
+    index,
+    ModelLoader,
+    path,
+    underscoreStr
 ) {
     'use strict';
 
@@ -59,10 +61,20 @@ define([
         app.set('port', Config.get('lyrical.server.port') || 3002);
 
         //Load models
-        ModelLoader.loadAll(function() {
-            //Start server
-            http.createServer(app).listen(app.get('port'), function(){
-                console.log('Express server listening on port ' + app.get('port'));
+        require(['orm/orm'], function(orm) {
+            ModelLoader.loadAll(function() {
+                orm.sync({
+                    //FIXME: Remove this later
+                    force: true
+                }).success(function() {
+                    //Start server
+                    http.createServer(app).listen(app.get('port'), function(){
+                        console.log('Express server listening on port ' + app.get('port'));
+                    });
+                }).error(function(error) {
+                    console.error('Failed to sync database:');
+                    console.error(error);
+                });
             });
         });
     }, this);
