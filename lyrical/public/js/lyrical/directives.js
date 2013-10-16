@@ -3,6 +3,15 @@
  * 
  * @author Joe Cavanagh
  */
-define(['angular'], function(angular) {
-    return angular.module('lyrical.directives', []);
+define([
+    'angular',
+    'lyrical/directives/Home'
+], function(angular, Home) {
+    'use strict';
+
+    return angular.module('lyrical.directives', [
+            //No dependencies
+        ]).directive(
+            Home.name, Home.factory
+        );
 });
