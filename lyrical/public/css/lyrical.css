@@ -1,3 +1,18 @@
 /* line 1, ../sass/lyrical/_home.scss */
 .home-panel-icon {
   font-size: 36px; }
+
+/* line 1, ../sass/lyrical/_misc.scss */
+.cursor-default {
+  cursor: default; }
+
+/* line 5, ../sass/lyrical/_misc.scss */
+.cursor-pointer {
+  cursor: pointer; }
+
+/* line 9, ../sass/lyrical/_misc.scss */
+.no-select {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none; }

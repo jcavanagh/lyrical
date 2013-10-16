@@ -1,7 +1,7 @@
 if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 /**
- * Angular Home directive
+ * Angular footer directive
  * 
  * @class
  * @author Joe Cavanagh
@@ -10,12 +10,12 @@ define([], function() {
     'use strict';
     
     return {
-        name: 'home',
+        name: 'footer',
         factory: function() {
             return {
                 replace: true,
                 restrict: 'E',
-                templateUrl: '/views/_home.html'
+                templateUrl: '/views/_footer.html'
             };
         }
     };

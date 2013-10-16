@@ -5,13 +5,16 @@
  */
 define([
     'angular',
-    'lyrical/directives/Home'
-], function(angular, Home) {
+    'lyrical/directives/Header',
+    'lyrical/directives/Footer'
+], function(angular, Header, Footer) {
     'use strict';
 
     return angular.module('lyrical.directives', [
             //No dependencies
         ]).directive(
-            Home.name, Home.factory
+            Header.name, Header.factory
+        ).directive(
+            Footer.name, Footer.factory
         );
 });
