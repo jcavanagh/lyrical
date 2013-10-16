@@ -12,7 +12,6 @@ define([
     'events',
     'express',
     'http',
-    'common/ModelLoader',
     'path',
     'underscore.string'
 ], function(
@@ -22,7 +21,6 @@ define([
     events,
     express,
     http,
-    ModelLoader,
     path,
     underscoreStr
 ) {
@@ -45,7 +43,7 @@ define([
 
         //Load models
         //ORM needs to be loaded here, since it needs Config
-        require(['orm/orm'], function(orm) {
+        require(['orm/orm', 'common/ModelLoader'], function(orm, ModelLoader) {
             ModelLoader.loadAll(function() {
                 orm.sync({
                     //FIXME: Remove this later, use migrations
