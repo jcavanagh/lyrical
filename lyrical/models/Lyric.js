@@ -6,8 +6,9 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @author Joe Cavanagh
  */
 define([
-    'orm/orm'
-], function(orm) {
+    'orm/orm',
+    'models/Meaning'
+], function(orm, Meaning) {
     'use strict';
 
     var Lyric = orm.define('Lyric', {
@@ -16,6 +17,8 @@ define([
         youtubeUrl: orm.STRING,
         soundcloudUrl: orm.STRING
     });
+
+    Lyric.hasMany(Meaning);
 
     return Lyric;
 });

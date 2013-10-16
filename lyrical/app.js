@@ -63,19 +63,29 @@ define([
                     app.use(express.static(path.join(__dirname, 'public')));
 
                     //Set routes
-                    //Controllers generally require models, so need to be loaded
+                    //Controllers require models, so need to be loaded here
                     //after ORM initialization
                     require([
                         'controllers/index',
-                        'controllers/Lyric'
-                    ], function(index, Lyric) {
+                        'controllers/Lyric',
+                        'controllers/Meaning'
+                    ], function(index, Meaning) {
+                        //Index
                         app.get('/', index.index);
 
+                        //Lyric
                         app.get('/api/lyric', Lyric.index);
                         app.get('/api/lyric/:id', Lyric.get);
                         app.post('/api/lyric', Lyric.post);
                         app.put('/api/lyric/:id', Lyric.put);
                         app.delete('/api/lyric/:id', Lyric.delete);
+
+                        //Meaning
+                        app.get('/api/meaning', Meaning.index);
+                        app.get('/api/meaning/:id', Meaning.get);
+                        app.post('/api/meaning', Meaning.post);
+                        app.put('/api/meaning/:id', Meaning.put);
+                        app.delete('/api/meaning/:id', Meaning.delete);
 
                         //Start server
                         http.createServer(app).listen(app.get('port'), function(){
