@@ -45,10 +45,7 @@ define([
         //ORM needs to be loaded here, since it needs Config
         require(['orm/orm', 'common/ModelLoader'], function(orm, ModelLoader) {
             ModelLoader.loadAll(function() {
-                orm.sync({
-                    //FIXME: Remove this later, use migrations
-                    force: true
-                }).success(function() {
+                orm.sync().success(function() {
                     //Set server port
                     app.set('port', Config.get('lyrical.server.port') || 3002);
 
