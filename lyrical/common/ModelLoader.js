@@ -11,6 +11,8 @@ define([
     'fs',
     'path'
 ], function(require, _, fs, path) {
+    'use strict';
+
 	var ModelLoader = {
         /**
          * Loads all modules, and executes the callback once complete
