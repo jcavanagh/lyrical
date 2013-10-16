@@ -13,7 +13,7 @@ sass_path = File.join(File.dirname(__FILE__), "..")
 # css_path: the directory you want your CSS files to be.
 # Generally this is a folder in the parent directory of your Sass files
 # <root>/resources/css
-css_path = File.join(sass_path, "..", "public", "css")
+css_path = File.join(sass_path, "..", "css")
 
 # You can select your preferred output style here (can be overridden via the command line):
 # output_style = :expanded or :nested or :compact or :compressed
