@@ -68,8 +68,9 @@ define([
                     require([
                         'controllers/index',
                         'controllers/Lyric',
-                        'controllers/Meaning'
-                    ], function(index, Meaning) {
+                        'controllers/Meaning',
+                        'controllers/Playlist'
+                    ], function(index, Lyric, Meaning, Playlist) {
                         //Index
                         app.get('/', index.index);
 
@@ -86,6 +87,13 @@ define([
                         app.post('/api/meaning', Meaning.post);
                         app.put('/api/meaning/:id', Meaning.put);
                         app.delete('/api/meaning/:id', Meaning.delete);
+
+                        //Playlist
+                        app.get('/api/playlist', Playlist.index);
+                        app.get('/api/playlist/:id', Playlist.get);
+                        app.post('/api/playlist', Playlist.post);
+                        app.put('/api/playlist/:id', Playlist.put);
+                        app.delete('/api/playlist/:id', Playlist.delete);
 
                         //Start server
                         http.createServer(app).listen(app.get('port'), function(){
