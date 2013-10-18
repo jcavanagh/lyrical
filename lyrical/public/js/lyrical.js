@@ -1,18 +1,19 @@
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
+
 define([
     'angular',
     'angularRoute',
     'lyrical/controllers',
     'lyrical/directives',
-    'lyrical/filters',
     'lyrical/services'
-], function (angular, angularRoute, controllers, directives, filters, services) {
+], function (angular, angularRoute, controllers, directives, services) {
     'use strict';
 
+    //Create main module
     return angular.module('lyrical', [
         'ngRoute',
         'lyrical.controllers',
         'lyrical.directives',
-        'lyrical.filters',
         'lyrical.services'
     ]).config(function($routeProvider, $locationProvider) {
         //Index routes

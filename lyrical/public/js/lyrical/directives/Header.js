@@ -6,17 +6,17 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @class
  * @author Joe Cavanagh
  */
-define([], function() {
+define(['angular'], function(angular) {
     'use strict';
-    
-    return {
-        name: 'header',
-        factory: function() {
+
+    return angular.module('lyrical.directives').directive(
+        'header',
+        function() {
             return {
                 replace: true,
                 restrict: 'E',
                 templateUrl: '/views/_header.html'
             };
         }
-    };
+    );
 });

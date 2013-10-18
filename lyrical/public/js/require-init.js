@@ -26,19 +26,27 @@ require.config({
 //Defer Angular bootstrap
 window.name = 'NG_DEFER_BOOTSTRAP';
 
-//Bootstrap Angular
+//Bootstrap Angular and lyrical modules
 require([
+    'require',
     'angular',
     'bootstrap',
-    'jquery',
-    'lyrical'
-], function(angular, bootstrap, jquery, lyrical) {
+    'jquery'
+], function(require, angular, bootstrap, jquery) {
     'use strict';
 
-    var $html = angular.element(document.getElementsByTagName('html')[0]);
+    //Create submodules
+    angular.module('lyrical.controllers', []);
+    angular.module('lyrical.directives', []);
+    angular.module('lyrical.resources', []);
+    angular.module('lyrical.services', []);
 
-    angular.element().ready(function() {
-        $html.addClass('ng-app');
-        angular.bootstrap($html, [lyrical.name]);
+    require(['lyrical'], function(lyrical) {
+        var $html = angular.element(document.getElementsByTagName('html')[0]);
+
+        angular.element().ready(function() {
+            $html.addClass('ng-app');
+            angular.bootstrap($html, [lyrical.name]);
+        });
     });
 });

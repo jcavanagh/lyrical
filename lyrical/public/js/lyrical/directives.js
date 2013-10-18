@@ -1,20 +1,15 @@
+if (typeof define !== 'function') { var define = require('amdefine')(module); }
+
 /**
  * App directives
  * 
  * @author Joe Cavanagh
  */
 define([
-    'angular',
     'lyrical/directives/Header',
     'lyrical/directives/Footer'
-], function(angular, Header, Footer) {
+], function() {
     'use strict';
 
-    return angular.module('lyrical.directives', [
-            //No dependencies
-        ]).directive(
-            Header.name, Header.factory
-        ).directive(
-            Footer.name, Footer.factory
-        );
+    return true;
 });
