@@ -8,7 +8,8 @@ require.config({
         jquery: 'lib/jquery.min',
         bootstrap: 'lib/bootstrap.min',
         angular: 'lib/angular',
-        angularRoute: 'lib/angular-route'
+        angularRoute: 'lib/angular-route.min',
+        angularResource: 'lib/angular-resource.min'
     },
     shim: {
         angular: { exports: 'angular' },
@@ -38,7 +39,7 @@ require([
     //Create submodules
     angular.module('lyrical.controllers', []);
     angular.module('lyrical.directives', []);
-    angular.module('lyrical.resources', []);
+    angular.module('lyrical.resources', ['ngResource']);
     angular.module('lyrical.services', []);
 
     require(['lyrical'], function(lyrical) {

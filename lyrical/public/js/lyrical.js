@@ -3,10 +3,12 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 define([
     'angular',
     'angularRoute',
+    'angularResource',
     'lyrical/controllers',
     'lyrical/directives',
-    'lyrical/services'
-], function (angular, angularRoute, controllers, directives, services) {
+    'lyrical/services',
+    'lyrical/resources'
+], function (angular, angularRoute, controllers, directives, services, resources) {
     'use strict';
 
     //Create main module
@@ -14,7 +16,8 @@ define([
         'ngRoute',
         'lyrical.controllers',
         'lyrical.directives',
-        'lyrical.services'
+        'lyrical.services',
+        'lyrical.resources'
     ]).config(function($routeProvider, $locationProvider) {
         //Index routes
         $routeProvider.when('/', {
@@ -22,7 +25,7 @@ define([
         });
 
         //Lyric routes
-        $routeProvider.when('/lyric', {
+        $routeProvider.when('/lyrics', {
             templateUrl: '/views/lyric/_lyric.html'
         });
 
@@ -35,7 +38,7 @@ define([
         });
 
         //Playlist routes
-        $routeProvider.when('/playlist', {
+        $routeProvider.when('/playlists', {
             templateUrl: '/views/playlist/_playlist.html'
         });
 

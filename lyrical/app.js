@@ -72,25 +72,25 @@ define([
                         app.get('/', index.index);
 
                         //Lyric
-                        app.get('/api/lyric', Lyric.index);
-                        app.get('/api/lyric/:id', Lyric.get);
-                        app.post('/api/lyric', Lyric.post);
-                        app.put('/api/lyric/:id', Lyric.put);
-                        app.delete('/api/lyric/:id', Lyric.delete);
+                        app.get('/api/lyrics', Lyric.index);
+                        app.get('/api/lyrics/:id', Lyric.get);
+                        app.post('/api/lyrics', Lyric.post);
+                        app.put('/api/lyrics/:id', Lyric.put);
+                        app.delete('/api/lyrics/:id', Lyric.delete);
 
                         //Meaning
-                        app.get('/api/meaning', Meaning.index);
-                        app.get('/api/meaning/:id', Meaning.get);
-                        app.post('/api/meaning', Meaning.post);
-                        app.put('/api/meaning/:id', Meaning.put);
-                        app.delete('/api/meaning/:id', Meaning.delete);
+                        app.get('/api/meanings', Meaning.index);
+                        app.get('/api/meanings/:id', Meaning.get);
+                        app.post('/api/meanings', Meaning.post);
+                        app.put('/api/meanings/:id', Meaning.put);
+                        app.delete('/api/meanings/:id', Meaning.delete);
 
                         //Playlist
-                        app.get('/api/playlist', Playlist.index);
-                        app.get('/api/playlist/:id', Playlist.get);
-                        app.post('/api/playlist', Playlist.post);
-                        app.put('/api/playlist/:id', Playlist.put);
-                        app.delete('/api/playlist/:id', Playlist.delete);
+                        app.get('/api/playlists', Playlist.index);
+                        app.get('/api/playlists/:id', Playlist.get);
+                        app.post('/api/playlists', Playlist.post);
+                        app.put('/api/playlists/:id', Playlist.put);
+                        app.delete('/api/playlists/:id', Playlist.delete);
 
                         //Start server
                         http.createServer(app).listen(app.get('port'), function(){

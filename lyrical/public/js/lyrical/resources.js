@@ -1,14 +1,14 @@
 if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 /**
- * App controllers
+ * Collection of app Resources
  * 
  * @author Joe Cavanagh
  */
 define([
-    'lyrical/controllers/Lyric'
+    'lyrical/resources/Lyric'
 ], function() {
     'use strict';
-     
+    
     return true;
 });
