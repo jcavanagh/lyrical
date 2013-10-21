@@ -1,15 +1,21 @@
 <div ng-controller="PlaylistCtl">
-    <h2>Playlists</h2>
-    <table class="table table-hover">
-        <thead>
-        </thead>
-        <tbody>
-            <tr ng-repeat="playlist in playlists" ng-click="edit({{$index}});">
-                <td>{{ playlist.title }}</td>
-                <td>{{ playlist.text }}</td>
-                <td>{{ playlist.soundcloudUrl }}</td>
-                <td>{{ playlist.youtubeUrl }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="container">
+        <div class="page-header">
+            <h2>Playlists</h2>
+        </div>
+        <table class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="playlist in playlists" ng-click="edit({{$index}});">
+                    <td>{{ playlist.title }}</td>
+                    <td>{{ playlist.text }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
