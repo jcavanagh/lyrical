@@ -5,17 +5,17 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 require.config({
     baseUrl: '/js',
     paths: {
-        jquery: 'lib/jquery.min',
-        bootstrap: 'lib/bootstrap.min',
         angular: 'lib/angular',
         angularRoute: 'lib/angular-route.min',
-        angularResource: 'lib/angular-resource.min'
+        angularResource: 'lib/angular-resource.min',
+        bootstrap: 'lib/bootstrap.min',
+        jquery: 'lib/jquery.min'
     },
     shim: {
         angular: { exports: 'angular' },
         angularRoute: [ 'angular' ],
-        jquery: { exports: '$' },
-        bootstrap: { deps: [ 'jquery' ], exports: 'bootstrap' }
+        bootstrap: { deps: [ 'jquery' ], exports: 'bootstrap' },
+        jquery: { exports: '$' }
     },
     priority: [
         'jquery',
