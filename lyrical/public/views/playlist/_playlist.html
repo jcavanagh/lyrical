@@ -1,0 +1,15 @@
+<div ng-controller="PlaylistCtl">
+    <h2>Playlists</h2>
+    <table class="table table-hover">
+        <thead>
+        </thead>
+        <tbody>
+            <tr ng-repeat="playlist in playlists" ng-click="edit({{$index}});">
+                <td>{{ playlist.title }}</td>
+                <td>{{ playlist.text }}</td>
+                <td>{{ playlist.soundcloudUrl }}</td>
+                <td>{{ playlist.youtubeUrl }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
