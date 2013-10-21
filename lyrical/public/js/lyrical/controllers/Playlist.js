@@ -9,5 +9,9 @@ define([], function() {
     return angular.module('lyrical.controllers')
         .controller('PlaylistCtl', function($scope, PlaylistResource) {
             $scope.playlists = PlaylistResource.query();
+
+            $scope.edit = function(playlist) {
+                window.location = '#/playlists/' + playlist.id
+            }
         });
 });

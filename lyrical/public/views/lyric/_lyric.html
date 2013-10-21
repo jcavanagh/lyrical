@@ -1,9 +1,15 @@
 <div ng-controller="LyricCtl">
     <div class="container">
         <div class="page-header">
-            <h2>Lyrics</h2>
+            <h2>Lyrics
+                <div class="button-group pull-right" style="display:inline-block">
+                    <a href="#/lyrics/create" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-plus-sign"></span> Create
+                    </a>
+                </div>
+            </h2>
         </div>
-        <table class="table table-hover">
+        <table class="table table-hover" rowlink>
             <thead>
                 <tr>
                     <th>Title</th>
@@ -13,7 +19,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="lyric in lyrics" ng-click="edit({{$index}});">
+                <tr ng-repeat="lyric in lyrics" ng-click="edit(lyric);">
                     <td>{{ lyric.title }}</td>
                     <td>{{ lyric.text }}</td>
                     <td>{{ lyric.soundcloudUrl }}</td>

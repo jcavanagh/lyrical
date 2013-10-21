@@ -1,7 +1,13 @@
 <div ng-controller="PlaylistCtl">
     <div class="container">
         <div class="page-header">
-            <h2>Playlists</h2>
+            <h2>Playlists
+                <div class="button-group pull-right" style="display:inline-block">
+                    <a href="#/playlists/create" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-plus-sign"></span> Create
+                    </a>
+                </div>
+            </h2>
         </div>
         <table class="table table-hover">
             <thead>
@@ -11,7 +17,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="playlist in playlists" ng-click="edit({{$index}});">
+                <tr ng-repeat="playlist in playlists" ng-click="edit(playlist);">
                     <td>{{ playlist.title }}</td>
                     <td>{{ playlist.text }}</td>
                 </tr>

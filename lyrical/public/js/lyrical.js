@@ -29,11 +29,11 @@ define([
             templateUrl: '/views/lyric/_lyric.html'
         });
 
-        $routeProvider.when('/lyric/create', {
+        $routeProvider.when('/lyrics/create', {
             templateUrl: '/views/lyric/_lyric_create.html'
         });
 
-        $routeProvider.when('/lyric/:id', {
+        $routeProvider.when('/lyrics/:id', {
             templateUrl: '/views/lyric/_lyric_edit.html'
         });
 
@@ -42,11 +42,11 @@ define([
             templateUrl: '/views/playlist/_playlist.html'
         });
 
-        $routeProvider.when('/playlist/create', {
+        $routeProvider.when('/playlists/create', {
             templateUrl: '/views/playlist/_playlist_create.html'
         });
 
-        $routeProvider.when('/playlist/:id', {
+        $routeProvider.when('/playlists/:id', {
             templateUrl: '/views/playlist/_playlist_edit.html'
         });
     });
