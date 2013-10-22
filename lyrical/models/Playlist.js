@@ -12,7 +12,8 @@ define([
     'use strict';
 
     var Playlist = orm.define('Playlist', {
-        title: orm.STRING
+        title: orm.STRING,
+        description: orm.TEXT
     });
 
     Playlist.hasMany(Lyric);

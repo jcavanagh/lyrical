@@ -20,10 +20,11 @@ define(['angular'], function(angular) {
             }
 
             $scope.create = function() {
-                PlaylistResource.post({
+                PlaylistResource.save({
                     title: $scope.title,
-                    lyrics: $scope.lyrics
+                    description: $scope.description
                 });
+                $location.path('/playlists');
             };
 
             $scope.edit = function(playlist) {
