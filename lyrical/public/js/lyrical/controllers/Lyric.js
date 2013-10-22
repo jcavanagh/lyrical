@@ -9,33 +9,41 @@ define(['angular'], function(angular) {
     'use strict';
 
     return angular.module('lyrical.controllers')
-        .controller('LyricCtl', function($scope, $route, $location, LyricResource) {
-            var lyricId = $route.current.params.id;
-            if(lyricId) {
-                //Detail
-                $scope.lyric = LyricResource.get({ id: lyricId });
-            } else {
-                //List
-                $scope.lyrics = LyricResource.query();
-            }
-
+        .controller('LyricCreateCtl', function($scope, $route, $location, LyricResource) {
             $scope.create = function() {
                 LyricResource.save({
-                    title: $scope.model.title,
-                    soundcloudUrl: $scope.model.soundcloudUrl,
-                    youtubeUrl: $scope.model.youtubeUrl
+                    title: $scope.model.title
                 }, function(lyric) {
                     $location.path('/lyrics/' + lyric.id);
                 });
             };
+        })
+        .controller('LyricUpdateCtl', function($scope, $route, $location, LyricResource) {
+            var lyricId = $route.current.params.id;
 
-            $scope.edit = function(lyric) {
-                $location.path('/lyrics/' + lyric.id);
-            };
+            $scope.model = LyricResource.get({ id: lyricId });
 
-            $scope.delete = function(lyric) {
-                LyricResource.delete({ id: lyric.id });
+            $scope.update = function() {
+                //Trim title
+                $scope.model.title = $scope.model.title.replace(/&nbsp;/g, ' ').trim();
+                
+                LyricResource.update($scope.model);
                 $location.path('/lyrics');
+            };
+        })
+        .controller('LyricDeleteCtl', function($scope, $route, $location, LyricResource) {
+            $scope.delete = function() {
+                if($scope.model && $scope.model.id) {
+                    LyricResource.delete({ id: $scope.model.id });
+                    $location.path('/lyrics');
+                }
+            };
+        })
+        .controller('LyricIndexCtl', function($scope, $route, $location, LyricResource) {
+            $scope.lyrics = LyricResource.query();
+
+            $scope.select = function(lyric) {
+                $location.path('/lyrics/' + lyric.id);
             };
         });
 });

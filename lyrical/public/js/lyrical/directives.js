@@ -7,7 +7,8 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  */
 define([
     'lyrical/directives/Header',
-    'lyrical/directives/Footer'
+    'lyrical/directives/Footer',
+    'lyrical/directives/ContentEditable'
 ], function() {
     'use strict';
 

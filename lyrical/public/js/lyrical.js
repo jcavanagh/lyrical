@@ -34,7 +34,7 @@ define([
         });
 
         $routeProvider.when('/lyrics/:id', {
-            templateUrl: '/views/lyric/_lyric_edit.html'
+            templateUrl: '/views/lyric/_lyric_update.html'
         });
 
         //Playlist routes
@@ -47,7 +47,7 @@ define([
         });
 
         $routeProvider.when('/playlists/:id', {
-            templateUrl: '/views/playlist/_playlist_edit.html'
+            templateUrl: '/views/playlist/_playlist_update.html'
         });
     });
 });

@@ -1,4 +1,4 @@
-<div ng-controller="LyricCtl">
+<div ng-controller="LyricIndexCtl">
     <div class="container">
         <div class="page-header">
             <h2>Lyrics
@@ -9,7 +9,8 @@
                 </div>
             </h2>
         </div>
-        <table class="table table-hover" rowlink>
+        <div>
+        <table class="table table-hover">
             <thead>
                 <tr>
                     <th>Title</th>
@@ -19,7 +20,7 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="lyric in lyrics" ng-click="edit(lyric);">
+                <tr ng-repeat="lyric in lyrics" ng-click="select(lyric);">
                     <td>{{ lyric.title }}</td>
                     <td>{{ lyric.text }}</td>
                     <td>{{ lyric.soundcloudUrl }}</td>
@@ -27,5 +28,6 @@
                 </tr>
             </tbody>
         </table>
+        </div>
     </div>
 </div>
