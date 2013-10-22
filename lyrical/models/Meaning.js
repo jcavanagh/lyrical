@@ -15,5 +15,7 @@ define([
         text: orm.TEXT
     });
 
-    return Meaning;
+    return {
+        model: Meaning
+    };
 });

@@ -52,17 +52,21 @@ define([
                     app.set('port', Config.get('lyrical.server.port') || 3002);
 
                     //Set app middleware
-                    app.set('views', __dirname + '/views');
-                    app.set('view engine', 'jade');
-                    app.use(express.favicon());
-                    app.use(express.logger('dev'));
-                    app.use(express.bodyParser());
-                    app.use(express.methodOverride());
-                    app.use(app.router);
-                    app.use(express.static(path.join(__dirname, 'public')));
-                    app.use(express.cookieParser(Config.get('lyrical.server.cookieSecret')));
-                    app.use(express.session());
-                    app.use(everyauth.middleware(app));
+                    app.set('views', __dirname + '/views')
+                       .set('view engine', 'jade')
+                       .use(express.favicon())
+                       .use(express.logger('dev'))
+                       .use(express.bodyParser())
+                       .use(express.methodOverride())
+                       .use(app.router)
+                       .use(express.static(path.join(__dirname, 'public')))
+                       .use(express.cookieParser(Config.get('lyrical.server.cookieSecret')))
+                       .use(express.session({
+                           secret: Config.get('lyrical.server.sessionSecret')
+                       }))
+                       .use(everyauth.middleware(app));
+
+                    everyauth.helpExpress(app);
 
                     //Set routes
                     //Controllers require models, so need to be loaded here

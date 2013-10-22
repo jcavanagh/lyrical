@@ -6,9 +6,8 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @author Joe Cavanagh
  */
 define([
-    'orm/orm',
-    'models/Lyric'
-], function(orm, Lyric) {
+    'orm/orm'
+], function(orm) {
     'use strict';
 
     var Playlist = orm.define('Playlist', {
@@ -16,7 +15,15 @@ define([
         description: orm.TEXT
     });
 
-    Playlist.hasMany(Lyric);
-
-    return Playlist;
+    return {
+        model: Playlist
+        ,associate: function(models) {
+            var Lyric = models.Lyric;
+            if(Lyric) {
+                Playlist.hasMany(Lyric.model);
+            } else {
+                console.error('Failed to associate Playlist with Lyric!');
+            }
+        }
+    };
 });

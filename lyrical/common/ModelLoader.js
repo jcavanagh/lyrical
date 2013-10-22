@@ -46,15 +46,33 @@ define([
                         }
                     );
 
-                    //Require them all - should specify their own dependencies
-                    //as normal
+                    //Require them all - modules should NOT specify their own dependencies
                     if(models.length > 0) {
                         require(models, function() {
+                            var modelObjs = {};
+
+                            //Map each model to a named key in an object
+                            _.each(arguments, function(arg, index) {
+                                var modelName = models[index].substr(models[index].lastIndexOf('/') + 1);
+                                modelObjs[modelName] = arg;
+                            });
+
+                            console.log(modelObjs);
+
+                            //Associate models if we need to
+                            _.each(modelObjs, function(model) {
+                                if(_.isFunction(model.associate)) {
+                                    model.associate(modelObjs);
+                                }
+                            });
+
+                            //Done!
                             if(_.isFunction(callback)) {
                                 callback();
                             }
                         });
                     } else {
+                        //Nothing to do
                         if(_.isFunction(callback)) {
                             callback();
                         }

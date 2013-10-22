@@ -6,9 +6,8 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @author Joe Cavanagh
  */
 define([
-    'orm/orm',
-    'models/Meaning'
-], function(orm, Meaning) {
+    'orm/orm'
+], function(orm) {
     'use strict';
 
     var Lyric = orm.define('Lyric', {
@@ -18,7 +17,22 @@ define([
         soundcloudUrl: orm.STRING
     });
 
-    Lyric.hasMany(Meaning);
+    return {
+        model: Lyric
+        ,associate: function(models) {
+            var Playlist = models.Playlist;
+            if(Playlist) {
+                Lyric.hasMany(Playlist.model);
+            } else {
+                console.error('Failed to associate Lyric with Playlist!');
+            }
 
-    return Lyric;
+            var Meaning = models.Meaning;
+            if(Meaning) {
+                Lyric.hasMany(Meaning.model);
+            } else {
+                console.error('Failed to associate Lyric with Meaning!');
+            }
+        }
+    };
 });
