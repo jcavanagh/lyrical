@@ -14,7 +14,7 @@ define(['models/Playlist'], function(Playlist) {
          * GET /playlist
          */
         index: function(req, res) {
-            Playlist.findAll().success(function(playlists) {
+            Playlist.model.findAll().success(function(playlists) {
                 res.json(playlists);
             }).error(function(error) {
                 res.status(500).json(error);
@@ -25,7 +25,7 @@ define(['models/Playlist'], function(Playlist) {
          * GET /playlist/:id
          */
         get: function(req, res) {
-            Playlist.find(req.params.id).success(function(playlist) {
+            Playlist.model.find(req.params.id).success(function(playlist) {
                 res.json(playlist);
             }).error(function(error) {
                 res.status(500).json(error);
@@ -36,7 +36,7 @@ define(['models/Playlist'], function(Playlist) {
          * POST /playlist
          */
         post: function(req, res) {
-            Playlist.create(req.body).success(function(playlist) {
+            Playlist.model.create(req.body).success(function(playlist) {
                 res.json(playlist);
             }).error(function(error) {
                 res.status(500).json(error);
@@ -47,7 +47,7 @@ define(['models/Playlist'], function(Playlist) {
          * PUT /playlist/:id
          */
         put: function(req, res) {
-            Playlist.find(req.params.id).success(function(playlist) {
+            Playlist.model.find(req.params.id).success(function(playlist) {
                 playlist.updateAttributes(req.body).success(function(updatedPlaylist) {
                     res.json(updatedPlaylist);
                 }).error(function(error) {
@@ -62,7 +62,7 @@ define(['models/Playlist'], function(Playlist) {
          * DELETE /playlist/:id
          */
         delete: function(req, res) {
-            Playlist.find(req.params.id).success(function(playlist) {
+            Playlist.model.find(req.params.id).success(function(playlist) {
                 if(!playlist) return res.status(400).json({ msg: 'Could not find record with id: ' + req.params.id });
                 playlist.destroy().success(function() {
                     res.json({});

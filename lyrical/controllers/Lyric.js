@@ -14,7 +14,7 @@ define(['models/Lyric'], function(Lyric) {
          * GET /lyric
          */
         index: function(req, res) {
-            Lyric.findAll().success(function(lyrics) {
+            Lyric.model.findAll().success(function(lyrics) {
                 res.json(lyrics);
             }).error(function(error) {
                 res.status(500).json(error);
@@ -25,7 +25,7 @@ define(['models/Lyric'], function(Lyric) {
          * GET /lyric/:id
          */
         get: function(req, res) {
-            Lyric.find(req.params.id).success(function(lyric) {
+            Lyric.model.find(req.params.id).success(function(lyric) {
                 res.json(lyric);
             }).error(function(error) {
                 res.status(500).json(error);
@@ -36,7 +36,7 @@ define(['models/Lyric'], function(Lyric) {
          * POST /lyric
          */
         post: function(req, res) {
-            Lyric.create(req.body).success(function(lyric) {
+            Lyric.model.create(req.body).success(function(lyric) {
                 res.json(lyric);
             }).error(function(error) {
                 res.status(500).json(error);
@@ -47,7 +47,7 @@ define(['models/Lyric'], function(Lyric) {
          * PUT /lyric/:id
          */
         put: function(req, res) {
-            Lyric.find(req.params.id).success(function(lyric) {
+            Lyric.model.find(req.params.id).success(function(lyric) {
                 lyric.updateAttributes(req.body).success(function(updatedLyric) {
                     res.json(updatedLyric);
                 }).error(function(error) {
@@ -62,7 +62,7 @@ define(['models/Lyric'], function(Lyric) {
          * DELETE /lyric/:id
          */
         delete: function(req, res) {
-            Lyric.find(req.params.id).success(function(lyric) {
+            Lyric.model.find(req.params.id).success(function(lyric) {
                 if(!lyric) return res.status(400).json({ msg: 'Could not find record with id: ' + req.params.id });
                 lyric.destroy().success(function() {
                     res.json({});
