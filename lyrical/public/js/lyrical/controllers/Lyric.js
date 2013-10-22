@@ -25,8 +25,9 @@ define(['angular'], function(angular) {
                     text: $scope.lyrics,
                     soundcloudUrl: $scope.soundcloudUrl,
                     youtubeUrl: $scope.youtubeUrl
+                }, function(lyric) {
+                    $location.path('/lyrics/' + lyric.id);
                 });
-                $location.path('/lyrics');
             };
 
             $scope.edit = function(lyric) {

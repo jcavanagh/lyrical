@@ -23,8 +23,9 @@ define(['angular'], function(angular) {
                 PlaylistResource.save({
                     title: $scope.title,
                     description: $scope.description
+                }, function(playlist) {
+                    $location.path('/playlists/' + playlist.id);
                 });
-                $location.path('/playlists');
             };
 
             $scope.edit = function(playlist) {
