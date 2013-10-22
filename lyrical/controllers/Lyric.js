@@ -63,8 +63,9 @@ define(['models/Lyric'], function(Lyric) {
          */
         delete: function(req, res) {
             Lyric.find(req.params.id).success(function(lyric) {
-                lyric.destroy(req.body).success(function(deletedLyric) {
-                    res.json(deletedLyric);
+                if(!lyric) return res.status(400).json({ msg: 'Could not find record with id: ' + req.params.id });
+                lyric.destroy().success(function() {
+                    res.json({});
                 }).error(function(error) {
                     res.status(500).json(error);
                 });

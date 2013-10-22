@@ -63,8 +63,9 @@ define(['models/Meaning'], function(Meaning) {
          */
         delete: function(req, res) {
             Meaning.find(req.params.id).success(function(meaning) {
-                meaning.destroy(req.body).success(function(deletedMeaning) {
-                    res.json(deletedMeaning);
+                if(!meaning) return res.status(400).json({ msg: 'Could not find record with id: ' + req.params.id });
+                meaning.destroy().success(function() {
+                    res.json({});
                 }).error(function(error) {
                     res.status(500).json(error);
                 });

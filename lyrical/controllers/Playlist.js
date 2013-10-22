@@ -63,8 +63,9 @@ define(['models/Playlist'], function(Playlist) {
          */
         delete: function(req, res) {
             Playlist.find(req.params.id).success(function(playlist) {
-                playlist.destroy(req.body).success(function(deletedPlaylist) {
-                    res.json(deletedPlaylist);
+                if(!playlist) return res.status(400).json({ msg: 'Could not find record with id: ' + req.params.id });
+                playlist.destroy().success(function() {
+                    res.json({});
                 }).error(function(error) {
                     res.status(500).json(error);
                 });
