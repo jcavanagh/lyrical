@@ -9,11 +9,33 @@ define(['angular'], function(angular) {
     'use strict';
 
     return angular.module('lyrical.controllers')
-        .controller('LyricCtl', function($scope, LyricResource) {
-            $scope.lyrics = LyricResource.query();
+        .controller('LyricCtl', function($scope, $route, $location, LyricResource) {
+            var lyricId = $route.current.params.id;
+            if(lyricId) {
+                //Detail
+                $scope.lyric = LyricResource.get({ id: lyricId });
+            } else {
+                //List
+                $scope.lyrics = LyricResource.query();
+            }
+
+            $scope.create = function() {
+                LyricResource.save({
+                    title: $scope.title,
+                    text: $scope.lyrics,
+                    soundcloudUrl: $scope.soundcloudUrl,
+                    youtubeUrl: $scope.youtubeUrl
+                });
+                $location.path('/lyrics');
+            };
 
             $scope.edit = function(lyric) {
-                window.location='#/lyrics/' + lyric.id;
+                $location.path('/lyrics/' + lyric.id);
+            };
+
+            $scope.delete = function(lyric) {
+                LyricResource.delete({ id: lyric.id });
+                $location.path('/lyrics');
             };
         });
 });

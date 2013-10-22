@@ -8,7 +8,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
 define(['angular'], function(angular) {
     return angular.module('lyrical.resources')
         .factory('PlaylistResource', function($resource) {
-            return $resource('/api/playlists', {}, { update: { method: 'PUT' } });
+            return $resource('/api/playlists/:id', { id: '@id' }, { update: { method: 'PUT' } });
         }
     );
 });
