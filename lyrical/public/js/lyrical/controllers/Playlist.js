@@ -21,8 +21,8 @@ define(['angular'], function(angular) {
 
             $scope.create = function() {
                 PlaylistResource.save({
-                    title: $scope.title,
-                    description: $scope.description
+                    title: $scope.model.title,
+                    description: $scope.model.description
                 }, function(playlist) {
                     $location.path('/playlists/' + playlist.id);
                 });

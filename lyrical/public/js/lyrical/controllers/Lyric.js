@@ -21,10 +21,9 @@ define(['angular'], function(angular) {
 
             $scope.create = function() {
                 LyricResource.save({
-                    title: $scope.title,
-                    text: $scope.lyrics,
-                    soundcloudUrl: $scope.soundcloudUrl,
-                    youtubeUrl: $scope.youtubeUrl
+                    title: $scope.model.title,
+                    soundcloudUrl: $scope.model.soundcloudUrl,
+                    youtubeUrl: $scope.model.youtubeUrl
                 }, function(lyric) {
                     $location.path('/lyrics/' + lyric.id);
                 });
