@@ -10,6 +10,7 @@ define([
     'underscore',
     'common/Config',
     'events',
+    'everyauth',
     'express',
     'http',
     'path',
@@ -19,6 +20,7 @@ define([
     _,
     Config,
     events,
+    everyauth,
     express,
     http,
     path,
@@ -58,6 +60,9 @@ define([
                     app.use(express.methodOverride());
                     app.use(app.router);
                     app.use(express.static(path.join(__dirname, 'public')));
+                    app.use(express.cookieParser(Config.get('lyrical.server.cookieSecret')));
+                    app.use(express.session());
+                    app.use(everyauth.middleware(app));
 
                     //Set routes
                     //Controllers require models, so need to be loaded here
