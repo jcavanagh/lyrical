@@ -1,4 +1,4 @@
-<div ng-controller="PlaylistCtl">
+<div ng-controller="PlaylistIndexCtl">
     <div class="container">
         <div class="page-header">
             <h2>Playlists
@@ -17,9 +17,9 @@
                 </tr>
             </thead>
             <tbody>
-                <tr ng-repeat="playlist in playlists" ng-click="edit(playlist);">
+                <tr ng-repeat="playlist in playlists" ng-click="select(playlist);">
                     <td>{{ playlist.title }}</td>
-                    <td>{{ playlist.text }}</td>
+                    <td>{{ playlist.description }}</td>
                 </tr>
             </tbody>
         </table>

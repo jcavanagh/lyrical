@@ -1,0 +1,26 @@
+<div ng-controller="PlaylistUpdateCtl">
+    <div class="container">
+        <div class="page-header">
+            <h2><span ng-model="model.title" contenteditable strip-br="true" no-line-breaks="true"></span>
+                <div class="button-group pull-right" style="display:inline-block" ng-controller="PlaylistDeleteCtl">
+                    <a ng-click="delete()" class="btn btn-danger">
+                        <span class="glyphicon glyphicon-trash"></span> Delete
+                    </a>
+                </div>
+            </h2>
+        </div>
+        <form ng-submit="update()" name="form" class="form-horizontal" role="form">
+            <div class="form-group">
+                <label class="col-md-2 control-label">Description</label>
+                <div class="col-md-10">
+                    <input ng-model="model.description" type="text" class="form-control" placeholder="Description">
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <button type="submit" class="btn btn-default">Save</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
