@@ -4,5 +4,5 @@
         "cookieSecret": "replace me"
 	},
 
-	"developmentMode": true
+	"developmentMode": false
 }
