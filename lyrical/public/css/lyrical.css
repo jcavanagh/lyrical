@@ -2,6 +2,27 @@
 .home-panel-icon {
   font-size: 36px; }
 
+/* line 1, ../sass/lyrical/_lyric.scss */
+.lyric-super-important {
+  color: #0000FF; }
+
+/* line 5, ../sass/lyrical/_lyric.scss */
+.lyric-important {
+  color: #00FF00; }
+
+/* line 9, ../sass/lyrical/_lyric.scss */
+.lyric-neutral {
+  color: #FFFF00; }
+
+/* line 13, ../sass/lyrical/_lyric.scss */
+.lyric-unimportant {
+  color: #FF7F00; }
+
+/* line 17, ../sass/lyrical/_lyric.scss */
+.lyric-irrelevant {
+  color: #FF0000;
+  text-decoration: line-through; }
+
 /* line 1, ../sass/lyrical/_misc.scss */
 .cursor-default {
   cursor: default; }

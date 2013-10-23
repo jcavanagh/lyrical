@@ -9,12 +9,14 @@ require.config({
         angularRoute: 'lib/angular-route.min',
         angularResource: 'lib/angular-resource.min',
         bootstrap: 'lib/bootstrap.min',
+        bootstrapAngularUi: 'lib/ui-bootstrap.min',
         jquery: 'lib/jquery.min'
     },
     shim: {
         angular: { exports: 'angular' },
         angularRoute: [ 'angular' ],
         bootstrap: { deps: [ 'jquery' ], exports: 'bootstrap' },
+        bootstrapAngularUi: { deps: [ 'angular', 'bootstrap' ]},
         jquery: { exports: '$' }
     },
     priority: [
@@ -27,13 +29,14 @@ require.config({
 //Defer Angular bootstrap
 window.name = 'NG_DEFER_BOOTSTRAP';
 
-//Bootstrap Angular and lyrical modules
+//Bootstrap libs and lyrical modules
 require([
     'require',
     'angular',
     'bootstrap',
+    'bootstrapAngularUi',
     'jquery'
-], function(require, angular, bootstrap, jquery) {
+], function(require, angular, bootstrap, bootstrapAngular, jquery) {
     'use strict';
 
     //Create submodules

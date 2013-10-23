@@ -14,6 +14,7 @@ define([
     //Create main module
     return angular.module('lyrical', [
         'ngRoute',
+        'ui.bootstrap',
         'lyrical.controllers',
         'lyrical.directives',
         'lyrical.services',
