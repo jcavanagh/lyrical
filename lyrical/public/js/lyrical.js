@@ -4,6 +4,7 @@ define([
     'angular',
     'angularRoute',
     'angularResource',
+    'angularSanitize',
     'lyrical/controllers',
     'lyrical/directives',
     'lyrical/services',
@@ -15,6 +16,7 @@ define([
     return angular.module('lyrical', [
         'ngRoute',
         'ui.bootstrap',
+        'ngSanitize',
         'lyrical.controllers',
         'lyrical.directives',
         'lyrical.services',

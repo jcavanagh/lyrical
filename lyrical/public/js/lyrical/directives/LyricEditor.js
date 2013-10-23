@@ -15,7 +15,10 @@ define(['angular'], function(angular) {
             return {
                 replace: true,
                 restrict: 'E',
-                templateUrl: '/directives/_lyric_editor.html'
+                templateUrl: '/directives/_lyric_editor.html',
+                controller: function($scope) {
+                    //Do stuff!
+                }
             };
         }
     );

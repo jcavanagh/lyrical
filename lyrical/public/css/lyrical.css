@@ -1,4 +1,8 @@
-/* line 1, ../sass/lyrical/_home.scss */
+/* line 2, ../sass/lyrical/_home.scss */
+body {
+  padding-bottom: 70px; }
+
+/* line 4, ../sass/lyrical/_home.scss */
 .home-panel-icon {
   font-size: 36px; }
 

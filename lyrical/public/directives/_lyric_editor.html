@@ -31,5 +31,5 @@
             popover-trigger="mouseenter"
         ></span>
     </div>
-    <textarea ng-model="model.text" required class="form-control" rows="15" placeholder="Lyrics"></textarea>
+    <div ng-model="lyrics" ng-paste="paste($event)" class="form-control" contenteditable strip-on-paste="true" style="height:auto"></div>
 </div>
