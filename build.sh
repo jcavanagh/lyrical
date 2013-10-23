@@ -12,4 +12,4 @@ R_JS_CONFIG="require-init.js"
 
 # Build!
 cd ${JS_DIR}
-node ${R_JS} -o name=lyrical baseUrl=. mainConfigFile=require-init.js out=${MIN_JS}
+node ${R_JS} -o name=lyrical baseUrl=. mainConfigFile=require-init.js out=${MIN_JS} optimize=none

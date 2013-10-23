@@ -1,15 +1,15 @@
 if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 define([
-    'angular',
     'angularRoute',
     'angularResource',
     'angularSanitize',
+    'bootstrapAngularUi',
     'lyrical/controllers',
     'lyrical/directives',
     'lyrical/services',
     'lyrical/resources'
-], function (angular, angularRoute, controllers, directives, services, resources) {
+], function (angularRoute, angularSanitize, bootstrapAngularUi, controllers, directives, services, resources) {
     'use strict';
 
     //Create main module
@@ -17,6 +17,7 @@ define([
         'ngRoute',
         'ui.bootstrap',
         'ngSanitize',
+        'ngResource',
         'lyrical.controllers',
         'lyrical.directives',
         'lyrical.services',

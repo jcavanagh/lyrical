@@ -1,4 +1,5 @@
 config.json
+lyrical.min.js
 node_modules
 orm/config/config.json
 .sass-cache
