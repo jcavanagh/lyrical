@@ -13,14 +13,12 @@ block bootstrap
             'use strict';
 
             //Create submodules
-            debugger;
             angular.module('lyrical.controllers', []);
             angular.module('lyrical.directives', []);
             angular.module('lyrical.resources', []);
             angular.module('lyrical.services', []);
 
             require(['lyrical'], function(lyrical) {
-                debugger;
                 var $html = angular.element(document.getElementsByTagName('html')[0]);
 
                 angular.element().ready(function() {
