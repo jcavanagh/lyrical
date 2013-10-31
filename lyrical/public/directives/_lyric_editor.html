@@ -4,32 +4,38 @@
             popover="Super important"
             popover-placement="top"
             popover-trigger="mouseenter"
+            ng-click="toolClick(0)"
         ></button>
         <button type="button" class="lyric-important glyphicon glyphicon-pencil"
             popover="Important"
             popover-placement="top"
             popover-trigger="mouseenter"
+            ng-click="toolClick(1)"
         ></button>
         <button type="button" class="lyric-neutral glyphicon glyphicon-pencil"
             popover="Neutral"
             popover-placement="top"
             popover-trigger="mouseenter"
+            ng-click="toolClick(2)"
         ></button>
         <button type="button" class="lyric-unimportant glyphicon glyphicon-pencil"
             popover="Unimportant"
             popover-placement="top"
             popover-trigger="mouseenter"
+            ng-click="toolClick(3)"
         ></button>
         <button type="button" class="lyric-irrelevant glyphicon glyphicon-pencil"
             popover="Irrelevant"
             popover-placement="top"
             popover-trigger="mouseenter"
+            ng-click="toolClick(4)"
         ></button>
         <span class="glyphicon glyphicon-question-sign" 
             popover="Click a tool, then select text in the lyrics box.  Then, you can annotate the text with what it means to you!" 
             popover-placement="right" 
             popover-trigger="mouseenter"
+            ng-click="toolClick(5)"
         ></span>
     </div>
-    <div ng-model="lyrics" ng-paste="paste($event)" class="form-control" contenteditable strip-on-paste="true" style="height:auto"></div>
+    <div ng-model="lyrics" class="form-control" contenteditable strip-on-paste="true" retain-space="false" style="height:auto"></div>
 </div>

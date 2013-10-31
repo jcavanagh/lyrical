@@ -17,7 +17,13 @@ define(['angular'], function(angular) {
                 restrict: 'E',
                 templateUrl: '/directives/_lyric_editor.html',
                 controller: function($scope) {
-                    //Do stuff!
+                    $scope.$on('paste', function() {
+                        console.log('paste!', arguments);
+                    });
+
+                    $scope.toolClick = function(toolId) {
+                        console.log('toolclick:', toolId);
+                    }
                 }
             };
         }
