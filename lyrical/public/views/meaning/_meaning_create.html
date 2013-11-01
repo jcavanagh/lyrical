@@ -1,0 +1,23 @@
+<div>
+    <div class="modal-header">
+        <h3>Create a Meaning</h3>
+    </div>
+    <form class="form-horizontal" role="form">
+        <div class="modal-body">
+            <div class="form-group">
+                <div class="container">
+                    {{ meaningText }}
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <textarea ng-model="model.description" required></textarea>
+                </div>
+            </div>
+        </div>
+    </form>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="onSubmit()">Save</button>
+        <button class="btn btn-warning" ng-click="onCancel()">Cancel</button>
+    </div>
+</div>

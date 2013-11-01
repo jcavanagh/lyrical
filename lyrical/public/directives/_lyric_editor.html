@@ -4,38 +4,42 @@
             popover="Super important"
             popover-placement="top"
             popover-trigger="mouseenter"
-            ng-click="toolClick(0)"
+            ng-click="toolClick('lyric-super-important')"
         ></button>
         <button type="button" class="lyric-important glyphicon glyphicon-pencil"
             popover="Important"
             popover-placement="top"
             popover-trigger="mouseenter"
-            ng-click="toolClick(1)"
+            ng-click="toolClick('lyric-important')"
         ></button>
         <button type="button" class="lyric-neutral glyphicon glyphicon-pencil"
             popover="Neutral"
             popover-placement="top"
             popover-trigger="mouseenter"
-            ng-click="toolClick(2)"
+            ng-click="toolClick('lyric-neutral')"
         ></button>
         <button type="button" class="lyric-unimportant glyphicon glyphicon-pencil"
             popover="Unimportant"
             popover-placement="top"
             popover-trigger="mouseenter"
-            ng-click="toolClick(3)"
+            ng-click="toolClick(lyric-unimportant)"
         ></button>
         <button type="button" class="lyric-irrelevant glyphicon glyphicon-pencil"
             popover="Irrelevant"
             popover-placement="top"
             popover-trigger="mouseenter"
-            ng-click="toolClick(4)"
+            ng-click="toolClick(lyric-irrelevant)"
         ></button>
         <span class="glyphicon glyphicon-question-sign" 
             popover="Click a tool, then select text in the lyrics box.  Then, you can annotate the text with what it means to you!" 
             popover-placement="right" 
             popover-trigger="mouseenter"
-            ng-click="toolClick(5)"
         ></span>
     </div>
-    <div ng-model="lyrics" class="form-control" contenteditable strip-on-paste="true" retain-space="false" style="height:auto"></div>
+    <div 
+        ng-mousedown="editorMousedown()"
+        ng-mouseup="editorMouseup()"
+        ng-mouseenter="editorMouseenter()"
+        ng-mouseleave="editorMouseleave()"
+        ng-model="lyrics" class="form-control" contenteditable strip-on-paste="true" retain-space="false" style="height:auto"></div>
 </div>

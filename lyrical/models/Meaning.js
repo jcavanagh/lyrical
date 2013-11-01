@@ -12,7 +12,7 @@ define([
         start: orm.INTEGER,
         end: orm.INTEGER,
         type: orm.INTEGER,
-        text: orm.TEXT
+        description: orm.TEXT
     });
 
     return {

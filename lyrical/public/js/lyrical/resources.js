@@ -7,6 +7,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  */
 define([
     'lyrical/resources/Lyric',
+    'lyrical/resources/Meaning',
     'lyrical/resources/Playlist'
 ], function() {
     'use strict';
