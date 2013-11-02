@@ -1,5 +1,8 @@
 <div ng-controller="PlaylistUpdateCtl">
-    <div class="container">
+    <div class="container" ng-hide="model.id">
+        Could not find a playlist with that ID!
+    </div>
+    <div class="container" ng-show="model.id">
         <div class="page-header">
             <h2><span ng-model="model.title" contenteditable strip-br="true" no-line-breaks="true"></span>
                 <div class="button-group pull-right" style="display:inline-block" ng-controller="PlaylistDeleteCtl">

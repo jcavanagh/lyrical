@@ -47,6 +47,10 @@ define([
                     );
 
                     //Require them all - modules should NOT specify their own dependencies
+                    //
+                    //Instead, models should define an associate() method that will be 
+                    //passed a dictionary of all models after all are loaded, and then
+                    //each model can set up its associations then
                     if(models.length > 0) {
                         require(models, function() {
                             var modelObjs = {};
@@ -72,7 +76,8 @@ define([
                             }
                         });
                     } else {
-                        //Nothing to do
+                        //Nothing to do - no models.  There should probably be models.
+                        console.error('No models loaded!  This seems bad.');
                         if(_.isFunction(callback)) {
                             callback();
                         }

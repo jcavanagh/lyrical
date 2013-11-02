@@ -11,11 +11,14 @@ define([
     var Meaning = orm.define('Meaning', {
         start: orm.INTEGER,
         end: orm.INTEGER,
-        type: orm.INTEGER,
+        type: orm.STRING,
         description: orm.TEXT
     });
 
     return {
         model: Meaning
+        ,associate: function(models) {
+            //Nothing to associate
+        }
     };
 });

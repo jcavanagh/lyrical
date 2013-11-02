@@ -1,4 +1,5 @@
 <div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
     <div class="button-group">
         <button type="button" class="lyric-super-important glyphicon glyphicon-pencil"
             popover="Super important"
@@ -22,24 +23,35 @@
             popover="Unimportant"
             popover-placement="top"
             popover-trigger="mouseenter"
-            ng-click="toolClick(lyric-unimportant)"
+            ng-click="toolClick('lyric-unimportant')"
         ></button>
         <button type="button" class="lyric-irrelevant glyphicon glyphicon-pencil"
             popover="Irrelevant"
             popover-placement="top"
             popover-trigger="mouseenter"
-            ng-click="toolClick(lyric-irrelevant)"
+            ng-click="toolClick('lyric-irrelevant')"
         ></button>
         <span class="glyphicon glyphicon-question-sign" 
             popover="Click a tool, then select text in the lyrics box.  Then, you can annotate the text with what it means to you!" 
             popover-placement="right" 
             popover-trigger="mouseenter"
         ></span>
+        <span style="margin-left: 10px;">
+            Selected tool: 
+            <span ng-show="activeTool" 
+                style="background: #DDD; border-radius: 2px; padding: 2px;"
+                class="{{ activeTool }} glyphicon glyphicon-pencil">
+            </span>
+            <span ng-hide="activeTool">None</span>
+        </span>
     </div>
     <div 
+        style="height:auto" class="form-control"
         ng-mousedown="editorMousedown()"
         ng-mouseup="editorMouseup()"
         ng-mouseenter="editorMouseenter()"
         ng-mouseleave="editorMouseleave()"
-        ng-model="lyrics" class="form-control" contenteditable strip-on-paste="true" retain-space="false" style="height:auto"></div>
+        ng-model="model.lyrics"
+        contenteditable strip-on-paste="true" retain-space="false">
+    </div>
 </div>

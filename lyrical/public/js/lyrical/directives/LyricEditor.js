@@ -17,11 +17,20 @@ define(['angular'], function(angular) {
                 restrict: 'E',
                 templateUrl: '/directives/_lyric_editor.html',
                 controller: function($scope, $modal, $rootScope) {
-                    var activeTool = null
-                        ,toolDragging = false
+                    //Tool/mouse state
+                    var toolDragging = false
                         ,mouseContained = false
                         ,mouseContainTimeout = 1000
                         ,mouseContainTimeoutId = null;
+
+                    //Scope things
+                    $scope.activeTool = null;
+                    $scope.alerts = [];
+
+                    $scope.closeAlert = function(index) {
+                        //Remove the alerts
+                        $scope.alerts.splice(index, 1);
+                    };
 
                     //Helpers
                     function resetDrag() {
@@ -50,24 +59,63 @@ define(['angular'], function(angular) {
                         var sel = window.getSelection()
                             ,range = sel.getRangeAt(0);
 
+                        //Make sure there's a selection
                         if(!range.collapsed) {
-                            //Extract selected text
-                            var text = sel.toString()
-                                ,start = range.startOffset
-                                ,end = range.endOffset;
+                            var activeTool = $scope.activeTool;
 
-                            //Create a modal to create the meaning
-                            var modal = createMeaningModal(function($scope, $modalInstance) {
-                                $scope.meaningText = text; 
+                            //If we have a tool
+                            if(activeTool) {
+                                //Extract selected text
+                                var text = sel.toString()
+                                    ,start = range.startOffset
+                                    ,end = range.endOffset;
 
-                                $scope.onSubmit = function() {
-                                    $modalInstance.dismiss($scope.model);
-                                };
+                                //Create a modal to create the meaning
+                                var modal = createMeaningModal(['$scope', '$modalInstance', 'MeaningResource', function($modalScope, $modalInstance, MeaningResource) {
+                                    //This is for display reference only - not saved with the meaning
+                                    $modalScope.meaningText = text;
 
-                                $scope.onCancel = function() {
-                                    $modalInstance.dismiss();
-                                };
-                            });
+                                    //Set all the things we already know on the modal's model
+                                    $modalScope.model = $modalScope.model || {};
+                                    $modalScope.model.type = activeTool;
+                                    $modalScope.model.start = start;
+                                    $modalScope.model.end = end;
+                                    $modalScope.model.LyricId = $scope.model.id;
+
+                                    $modalScope.onSubmit = function() {
+                                        try {
+                                            //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                            //       but seems benign
+                                            $modalInstance.dismiss();
+                                        } catch(e) {
+                                            //Do nothing
+                                        }
+
+                                        //Save the Meaning
+                                        //FIXME: I should probably push down the CRUD stuff to services from controllers
+                                        debugger;
+                                        MeaningResource.save($modalScope.model);
+                                    };
+
+                                    $modalScope.onCancel = function() {
+                                        window.getSelection().removeAllRanges();
+                                        
+                                        try {
+                                            //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                            //       but seems benign
+                                            $modalInstance.dismiss();
+                                        } catch(e) {
+                                            //Do nothing
+                                        }
+                                    };
+                                }]);
+                            } else {
+                                //Choose a tool, fool!
+                                $scope.alerts.push({
+                                    type: 'danger'
+                                    ,msg: 'Please select a tool before annotating text!'
+                                });
+                            }
                         }
                     }
 
@@ -78,7 +126,7 @@ define(['angular'], function(angular) {
 
                     $scope.toolClick = function(toolCls) {
                         console.log('toolclick:', toolCls);
-                        activeTool = toolCls;
+                        $scope.activeTool = toolCls;
                         resetDrag();
                     };
 

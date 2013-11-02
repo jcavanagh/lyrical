@@ -2,8 +2,8 @@
     <div class="modal-header">
         <h3>Create a Meaning</h3>
     </div>
-    <form class="form-horizontal" role="form">
-        <div class="modal-body">
+    <div class="modal-body">
+        <form class="form-horizontal" role="form">
             <div class="form-group">
                 <div class="container">
                     {{ meaningText }}
@@ -14,8 +14,8 @@
                     <textarea ng-model="model.description" required></textarea>
                 </div>
             </div>
-        </div>
-    </form>
+        </form>
+    </div>
     <div class="modal-footer">
         <button class="btn btn-primary" ng-click="onSubmit()">Save</button>
         <button class="btn btn-warning" ng-click="onCancel()">Cancel</button>
