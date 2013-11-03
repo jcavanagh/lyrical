@@ -20,7 +20,8 @@ define([
 
     var orm = new Sequelize(dbName, dbUser, dbPw, {
         host: dbHost,
-        dialect: 'postgres'
+        dialect: 'postgres',
+        syncOnAssociation: false,
     });
 
     //FIXME: This might be the worst possible idea

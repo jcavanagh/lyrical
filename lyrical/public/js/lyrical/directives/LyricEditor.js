@@ -16,21 +16,88 @@ define(['angular'], function(angular) {
                 replace: true,
                 restrict: 'E',
                 templateUrl: '/directives/_lyric_editor.html',
-                controller: function($scope, $modal, $rootScope) {
+                link: function($scope, $element, attrs) {
+                    //Insert meanings into the editor markup
+                    function insertMeanings() {
+                        if($scope.model && $scope.model.meanings) {
+                            //Remove all existing meanings from the markup
+                            angular.forEach($element.find('.meaning'), function(element) {
+                                element.remove();
+                            });
+
+                            //Sort and reverse
+                            //We want to insert from the largest start index down to make things easy
+                            var meanings = $scope.model.meanings.sort(function(a, b) {
+                                if(a.start < b.start) { return -1; }
+                                if(a.start > b.start) { return 1; }
+
+                                return 0;
+                            }).reverse();
+
+                            //Add new meanings into the markup
+                            var editorEl = $element.find('.lyriceditor');
+                            if(editorEl) {
+                                var appliedMeanings = [];
+
+                                //FIXME: This logic probably needs to be factored out
+                                angular.forEach(meanings, function(meaning) {
+                                    var start = meaning.start,
+                                        end = meaning.end,
+                                        cls = meaning.type,
+                                        html = editorEl.html();
+
+                                    //Check basic bounds
+                                    var boundsValid = true;
+                                    if(start < 0) { console.warn('Negative meaning start:', meaning); boundsValid = false; }
+                                    if(end > html.length) { console.warn('Meaning extends beyond lyric bounds:', meaning); boundsValid = false; }
+
+                                    //Check to see if we intersect another meaning already rendered
+                                    angular.forEach(appliedMeanings, function(appliedMeaning) {
+                                        //One meaning's start may equal another's end, but starts may not match
+                                        if(meaning.start >= appliedMeaning.start && meaning.start < appliedMeaning.end) {
+                                            console.warn('Meaning start intersects already rendered meaning:', meaning, appliedMeaning);
+                                            boundsValid = false;
+                                        }
+
+                                        if(meaning.end <= appliedMeaning.end && meaning.end > appliedMeaning.start) {
+                                            console.warn('Meaning end intersects already rendered meaning:', meaning, appliedMeaning);
+                                            boundsValid = false;
+                                        }
+                                    });
+
+                                    //Skip to the next if we failed our bounds checks
+                                    if(!boundsValid) { return; }
+
+                                    //Snip out substrings and create highlight elements
+                                    var beforeStart = html.substr(0, start),
+                                        between = html.substr(start, end),
+                                        afterEnd = html.substr(end),
+                                        startHtml = '<span class="' + cls + '">',
+                                        endHtml = '</span>';
+
+                                    //Insert!
+                                    editorEl.html(beforeStart + startHtml + between + endHtml + afterEnd);
+
+                                    //We've inserted this one - stash it
+                                    appliedMeanings.push(meaning);
+                                });
+                            } else {
+                                console.error('Could not find lyric editor element!');
+                            }
+                        }
+                    }
+
+                    $scope.$watch('model.meanings', function() {
+                        //Whenever the model updates, we need to rerender meanings
+                        insertMeanings();
+                    });
+                },
+                controller: function($scope, $modal, $element) {
                     //Tool/mouse state
                     var toolDragging = false
                         ,mouseContained = false
                         ,mouseContainTimeout = 1000
                         ,mouseContainTimeoutId = null;
-
-                    //Scope things
-                    $scope.activeTool = null;
-                    $scope.alerts = [];
-
-                    $scope.closeAlert = function(index) {
-                        //Remove the alerts
-                        $scope.alerts.splice(index, 1);
-                    };
 
                     //Helpers
                     function resetDrag() {
@@ -54,6 +121,15 @@ define(['angular'], function(angular) {
                         });
                     }
 
+                    //Scope things
+                    $scope.activeTool = null;
+                    $scope.alerts = [];
+
+                    $scope.closeAlert = function(index) {
+                        //Remove the alerts
+                        $scope.alerts.splice(index, 1);
+                    };
+
                     //Creates a new Meaning
                     function onTextSelected() {
                         var sel = window.getSelection()
@@ -71,7 +147,7 @@ define(['angular'], function(angular) {
                                     ,end = range.endOffset;
 
                                 //Create a modal to create the meaning
-                                var modal = createMeaningModal(['$scope', '$modalInstance', 'MeaningResource', function($modalScope, $modalInstance, MeaningResource) {
+                                var modal = createMeaningModal(['$scope', '$modalInstance', 'LyricResource', 'MeaningResource', function($modalScope, $modalInstance, LyricResource, MeaningResource) {
                                     //This is for display reference only - not saved with the meaning
                                     $modalScope.meaningText = text;
 
@@ -83,18 +159,24 @@ define(['angular'], function(angular) {
                                     $modalScope.model.LyricId = $scope.model.id;
 
                                     $modalScope.onSubmit = function() {
-                                        try {
-                                            //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                            //       but seems benign
-                                            $modalInstance.dismiss();
-                                        } catch(e) {
-                                            //Do nothing
-                                        }
+                                        window.getSelection().removeAllRanges();
 
                                         //Save the Meaning
-                                        //FIXME: I should probably push down the CRUD stuff to services from controllers
-                                        debugger;
-                                        MeaningResource.save($modalScope.model);
+                                        //FIXME: I should probably push down the CRUD stuff to services
+                                        MeaningResource.save($modalScope.model, function(meaning) {
+                                            //Reload the lyric model
+                                            LyricResource.get({ id: meaning.LyricId }, function(lyric) {
+                                                $scope.model = lyric;
+                                            });
+
+                                            try {
+                                                //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                                //       but seems benign
+                                                $modalInstance.dismiss();
+                                            } catch(e) {
+                                                //Do nothing
+                                            }
+                                        });
                                     };
 
                                     $modalScope.onCancel = function() {
@@ -125,26 +207,22 @@ define(['angular'], function(angular) {
                     });
 
                     $scope.toolClick = function(toolCls) {
-                        console.log('toolclick:', toolCls);
                         $scope.activeTool = toolCls;
                         resetDrag();
                     };
 
                     //Mouse tracking
                     $scope.editorMousedown = function() {
-                        console.log('mousedown');
                         dragStart();
                     };
 
                     $scope.editorMouseup = function() {
-                        console.log('mouseup');
                         dragEnd();
 
                         onTextSelected();
                     };
 
                     $scope.editorMouseenter = function() {
-                        console.log('mouseenter');
                         mouseContained = true;
 
                         if(mouseContainTimeoutId) {
@@ -153,7 +231,6 @@ define(['angular'], function(angular) {
                     };
 
                     $scope.editorMouseleave = function() {
-                        console.log('mouseleave');
                         mouseContained = false;
 
                         //If the mouse leaves, we can't detect mouseup

@@ -6,13 +6,12 @@
         <form class="form-horizontal" role="form">
             <div class="form-group">
                 <div class="container">
-                    {{ meaningText }}
+                    You selected: {{ meaningText }}
                 </div>
             </div>
             <div class="form-group">
-                <div class="col-md-offset-2 col-md-10">
-                    <textarea ng-model="model.description" required></textarea>
-                </div>
+                <label>What does it mean?</label>
+                <textarea class="form-control" ng-model="model.description" required></textarea>
             </div>
         </form>
     </div>

@@ -6,7 +6,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @class
  * @author Joe Cavanagh
  */
-define(['models/Lyric'], function(Lyric) {
+define(['models/Lyric', 'models/Meaning'], function(Lyric, Meaning) {
 	'use strict';
 
     return {
@@ -14,7 +14,7 @@ define(['models/Lyric'], function(Lyric) {
          * GET /lyric
          */
         index: function(req, res) {
-            Lyric.model.findAll().success(function(lyrics) {
+            Lyric.model.findAll({ include: [ Meaning.model ] }).success(function(lyrics) {
                 res.json(lyrics);
             }).error(function(error) {
                 res.status(500).json(error);
@@ -25,7 +25,7 @@ define(['models/Lyric'], function(Lyric) {
          * GET /lyric/:id
          */
         get: function(req, res) {
-            Lyric.model.find(req.params.id).success(function(lyric) {
+            Lyric.model.find({ where: { id: req.params.id }, include: [ Meaning.model ] }).success(function(lyric) {
                 res.json(lyric);
             }).error(function(error) {
                 res.status(500).json(error);
