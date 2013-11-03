@@ -7,9 +7,10 @@ define([
     'bootstrapAngularUi',
     'lyrical/controllers',
     'lyrical/directives',
+    'lyrical/filters',
     'lyrical/services',
     'lyrical/resources'
-], function (angularRoute, angularSanitize, bootstrapAngularUi, controllers, directives, services, resources) {
+], function (angularRoute, angularSanitize, bootstrapAngularUi, controllers, directives, filters, services, resources) {
     'use strict';
 
     //Create main module
@@ -20,6 +21,7 @@ define([
         'ngResource',
         'lyrical.controllers',
         'lyrical.directives',
+        'lyrical.filters',
         'lyrical.services',
         'lyrical.resources'
     ]).config(function($routeProvider, $locationProvider) {
