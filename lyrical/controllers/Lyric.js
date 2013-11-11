@@ -48,10 +48,13 @@ define(['models/Lyric', 'models/Meaning'], function(Lyric, Meaning) {
          */
         put: function(req, res) {
             Lyric.model.find(req.params.id).success(function(lyric) {
-                lyric.updateAttributes(req.body).success(function(updatedLyric) {
-                    res.json(updatedLyric);
-                }).error(function(error) {
-                    res.status(500).json(error);
+                //Clear out any meanings previously associated
+                lyric.setMeanings([]).success(function() {
+                    lyric.updateAttributes(req.body).success(function(updatedLyric) {
+                        res.json(updatedLyric);
+                    }).error(function(error) {
+                        res.status(500).json(error);
+                    });
                 });
             }).error(function(error) {
                 res.status(500).json(error);

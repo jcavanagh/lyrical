@@ -5,7 +5,9 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * 
  * @author Joe Cavanagh
  */
-define([], function() {
+define([
+    'lyrical/services/utils'
+], function() {
     'use strict';
     
     return true;

@@ -11,85 +11,86 @@ define(['angular'], function(angular) {
     
     return angular.module('lyrical.directives').directive(
         'lyriceditor',
-        function() {
+        function(utils) {
             return {
                 replace: true,
                 restrict: 'E',
                 templateUrl: '/directives/_lyric_editor.html',
                 link: function($scope, $element, attrs) {
+                    function getEditorEl() {
+                        return $element.find('.lyriceditor');
+                    }
+
+                    //Returns a list of all meanings in the current editor view
+                    function getMeanings() {
+                        var editorEl = getEditorEl()
+                            ,meanings = [];
+
+                        if(editorEl) {
+                            var children = editorEl.children();
+
+                            for(var x = 0; x < children.length; x++) {
+                                var el = children[x],
+                                    html = editorEl.html(),
+                                    elHtml = el.outerHTML,
+                                    elText = el.innerHTML,
+                                    start = html.indexOf(elHtml),
+                                    end = start + elText.length;
+
+                                meanings.push({
+                                    start: start,
+                                    end: end
+                                });
+                            }
+                        } else {
+                            console.error('Could not find lyric editor element!');
+                        }
+
+                        return meanings;
+                    }
+
                     //Insert meanings into the editor markup
-                    function insertMeanings() {
-                        if($scope.model && $scope.model.meanings) {
-                            //Remove all existing meanings from the markup
-                            angular.forEach($element.find('.meaning'), function(element) {
-                                element.remove();
+                    function insertMeaning(meaning) {
+                        //Insert a meaning into the lyric view
+                        var editorEl = getEditorEl();
+                        if(editorEl) {
+                            var html = editorEl.html(),
+                                textNodes = editorEl.contents().filter(function(idx, val) {
+                                    return val instanceof Text;
+                                }),
+                                text = '';
+
+                            //Loop text nodes and create the string of non-wrapped data
+                            //FIXME: It sure would be nice if jQuery had a reduce function
+                            textNodes.each(function(idx, node) {
+                                text += node.data;
                             });
 
-                            //Sort and reverse
-                            //We want to insert from the largest start index down to make things easy
-                            var meanings = $scope.model.meanings.sort(function(a, b) {
-                                if(a.start < b.start) { return -1; }
-                                if(a.start > b.start) { return 1; }
+                            //Check bounds on existing meanings
+                            // if(!checkMeaningBounds(editorEl, meaning)) { return; }
 
-                                return 0;
-                            }).reverse();
+                            //Snip out substrings and create highlight elements
+                            var beforeStart = html.substr(0, meaning.start),
+                                between = text.substr(meaning.start, meaning.end),
+                                afterEnd = html.substr(meaning.end),
+                                //Invent a meaningless unique ID so this can be reliably pulled from the DOM
+                                uniqueId = (+ new Date() ).toString(36),
+                                tagStart = '<span data-uniqueId="' + uniqueId + '" class="meaning ' + meaning.type + '">',
+                                tagEnd = '</span>';
 
-                            //Add new meanings into the markup
-                            var editorEl = $element.find('.lyriceditor');
-                            if(editorEl) {
-                                var appliedMeanings = [];
-
-                                //FIXME: This logic probably needs to be factored out
-                                angular.forEach(meanings, function(meaning) {
-                                    var start = meaning.start,
-                                        end = meaning.end,
-                                        cls = meaning.type,
-                                        html = editorEl.html();
-
-                                    //Check basic bounds
-                                    var boundsValid = true;
-                                    if(start < 0) { console.warn('Negative meaning start:', meaning); boundsValid = false; }
-                                    if(end > html.length) { console.warn('Meaning extends beyond lyric bounds:', meaning); boundsValid = false; }
-
-                                    //Check to see if we intersect another meaning already rendered
-                                    angular.forEach(appliedMeanings, function(appliedMeaning) {
-                                        //One meaning's start may equal another's end, but starts may not match
-                                        if(meaning.start >= appliedMeaning.start && meaning.start < appliedMeaning.end) {
-                                            console.warn('Meaning start intersects already rendered meaning:', meaning, appliedMeaning);
-                                            boundsValid = false;
-                                        }
-
-                                        if(meaning.end <= appliedMeaning.end && meaning.end > appliedMeaning.start) {
-                                            console.warn('Meaning end intersects already rendered meaning:', meaning, appliedMeaning);
-                                            boundsValid = false;
-                                        }
-                                    });
-
-                                    //Skip to the next if we failed our bounds checks
-                                    if(!boundsValid) { return; }
-
-                                    //Snip out substrings and create highlight elements
-                                    var beforeStart = html.substr(0, start),
-                                        between = html.substr(start, end),
-                                        afterEnd = html.substr(end),
-                                        startHtml = '<span class="' + cls + '">',
-                                        endHtml = '</span>';
-
-                                    //Insert!
-                                    editorEl.html(beforeStart + startHtml + between + endHtml + afterEnd);
-
-                                    //We've inserted this one - stash it
-                                    appliedMeanings.push(meaning);
-                                });
-                            } else {
-                                console.error('Could not find lyric editor element!');
-                            }
+                            editorEl.html(beforeStart + tagStart + between + tagEnd + afterEnd);
+                        } else {
+                            console.error('Could not find lyric editor element!');
                         }
                     }
 
-                    $scope.$watch('model.meanings', function() {
-                        //Whenever the model updates, we need to rerender meanings
-                        insertMeanings();
+                    $scope.$watch('newMeaning', function(newMeaning) {
+                        //Whenever a new meaning is saved from the modal, we need to render it
+                        if(newMeaning) {
+                            insertMeaning(newMeaning);
+                        } else {
+                            console.log('Not rendering null meaning.');
+                        }
                     });
                 },
                 controller: function($scope, $modal, $element) {
@@ -132,8 +133,8 @@ define(['angular'], function(angular) {
 
                     //Creates a new Meaning
                     function onTextSelected() {
-                        var sel = window.getSelection()
-                            ,range = sel.getRangeAt(0);
+                        var sel = window.getSelection(),
+                            range = sel.getRangeAt(0);
 
                         //Make sure there's a selection
                         if(!range.collapsed) {
@@ -142,12 +143,23 @@ define(['angular'], function(angular) {
                             //If we have a tool
                             if(activeTool) {
                                 //Extract selected text
-                                var text = sel.toString()
-                                    ,start = range.startOffset
-                                    ,end = range.endOffset;
+                                var text = sel.toString(),
+                                    start = range.startOffset,
+                                    end = start + range.toString().length,
+                                    ancestorContainer = angular.element(range.commonAncestorContainer);
+
+                                //If the range's common ancestor container is the lyric editor, then
+                                //we are intersecting an existing meaning element.  Don't allow this.
+                                if(ancestorContainer.hasClass('lyriceditor')) {
+                                    $scope.alerts[0] = {
+                                        type: 'danger'
+                                        ,msg: 'Meanings cannot overlap!'
+                                    };
+                                    return;
+                                }
 
                                 //Create a modal to create the meaning
-                                var modal = createMeaningModal(['$scope', '$modalInstance', 'LyricResource', 'MeaningResource', function($modalScope, $modalInstance, LyricResource, MeaningResource) {
+                                var modal = createMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
                                     //This is for display reference only - not saved with the meaning
                                     $modalScope.meaningText = text;
 
@@ -161,22 +173,16 @@ define(['angular'], function(angular) {
                                     $modalScope.onSubmit = function() {
                                         window.getSelection().removeAllRanges();
 
-                                        //Save the Meaning
-                                        //FIXME: I should probably push down the CRUD stuff to services
-                                        MeaningResource.save($modalScope.model, function(meaning) {
-                                            //Reload the lyric model
-                                            LyricResource.get({ id: meaning.LyricId }, function(lyric) {
-                                                $scope.model = lyric;
-                                            });
+                                        //Stash and renderthe Meaning
+                                        $scope.newMeaning = angular.copy($modalScope.model);
 
-                                            try {
-                                                //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                                //       but seems benign
-                                                $modalInstance.dismiss();
-                                            } catch(e) {
-                                                //Do nothing
-                                            }
-                                        });
+                                        try {
+                                            //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                            //       but seems benign
+                                            $modalInstance.dismiss();
+                                        } catch(e) {
+                                            //Do nothing
+                                        }
                                     };
 
                                     $modalScope.onCancel = function() {
@@ -193,10 +199,10 @@ define(['angular'], function(angular) {
                                 }]);
                             } else {
                                 //Choose a tool, fool!
-                                $scope.alerts.push({
+                                $scope.alerts[0] = {
                                     type: 'danger'
                                     ,msg: 'Please select a tool before annotating text!'
-                                });
+                                };
                             }
                         }
                     }
