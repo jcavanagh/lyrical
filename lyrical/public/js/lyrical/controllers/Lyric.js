@@ -21,9 +21,7 @@ define(['angular'], function(angular) {
         .controller('LyricUpdateCtl', function($scope, $route, $location, LyricResource) {
             var lyricId = $route.current.params.id;
 
-            $scope.model = LyricResource.get({ id: lyricId }, function(lyric) {
-                $scope.existingMeanings = lyric.meanings;
-            });
+            $scope.model = LyricResource.get({ id: lyricId });
 
             $scope.update = function() {
                 //Trim title

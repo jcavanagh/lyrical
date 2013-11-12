@@ -52,8 +52,18 @@ define(['async', 'models/Lyric', 'models/Meaning'], function(async, Lyric, Meani
                 //This is done like this since Sequelize's bulk create can't tell me what it created
                 var meaningsToCreate = req.body.meanings.map(function(meaning) {
                     return function(callback) {
-                        Meaning.model.create(meaning).success(function(newMeaning) {
-                            callback(null, newMeaning);
+                        Meaning.model.find(meaning.id).success(function(foundMeaning) {
+                            if(meaning.id && foundMeaning) {
+                                //If we found one, super
+                                callback(null, foundMeaning);
+                            } else {
+                                //Otherwise, create it
+                                Meaning.model.create(meaning).success(function(newMeaning) {
+                                    callback(null, newMeaning);
+                                }).error(function(error) {
+                                    callback(true, error);
+                                });
+                            }
                         }).error(function(error) {
                             callback(true, error);
                         });
@@ -61,6 +71,13 @@ define(['async', 'models/Lyric', 'models/Meaning'], function(async, Lyric, Meani
                 });
 
                 async.series(meaningsToCreate, function(error, newMeanings) {
+                    if(error) {
+                        var msg = 'Error updating lyric meanings:', error;
+                        console.error(msg);
+                        res.status(500).json(msg);
+                        return;
+                    }
+
                     //Replace any meanings previously associated
                     lyric.setMeanings(newMeanings).success(function() {
                         lyric.updateAttributes(req.body).success(function(updatedLyric) {
