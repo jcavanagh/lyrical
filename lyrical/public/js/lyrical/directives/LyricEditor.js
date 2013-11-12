@@ -1,4 +1,4 @@
-if (typeof define !== 'function') { var define = require('amdefine')(module); }
+    if (typeof define !== 'function') { var define = require('amdefine')(module); }
 
 /**
  * Angular lyric editor directive
@@ -21,6 +21,14 @@ define(['angular'], function(angular) {
                         return $element.find('.lyriceditor');
                     }
 
+                    function sortMeanings(meanings) {
+                        meanings.sort(function(a, b) {
+                            if(a.start < b.start) { return -1; }
+                            if(a.start > b.start) { return 1; }
+                            return 0;
+                        });
+                    }
+
                     //Returns a list of all meanings in the current editor view
                     function getMeanings() {
                         var editorEl = getEditorEl()
@@ -34,12 +42,16 @@ define(['angular'], function(angular) {
                                     html = editorEl.html(),
                                     elHtml = el.outerHTML,
                                     elText = el.innerHTML,
-                                    start = html.indexOf(elHtml),
-                                    end = start + elText.length;
+                                    start = parseInt(el.getAttribute('data-start')),
+                                    end = parseInt(el.getAttribute('data-end')),
+                                    description = el.getAttribute('data-description'),
+                                    type = el.getAttribute('data-type');
 
                                 meanings.push({
                                     start: start,
-                                    end: end
+                                    end: end,
+                                    description: description,
+                                    type: type
                                 });
                             }
                         } else {
@@ -66,16 +78,19 @@ define(['angular'], function(angular) {
                                 text += node.data;
                             });
 
-                            //Check bounds on existing meanings
-                            // if(!checkMeaningBounds(editorEl, meaning)) { return; }
-
                             //Snip out substrings and create highlight elements
                             var beforeStart = html.substr(0, meaning.start),
-                                between = text.substr(meaning.start, meaning.end),
+                                between = text.substr(meaning.start, meaning.end - meaning.start),
                                 afterEnd = html.substr(meaning.end),
                                 //Invent a meaningless unique ID so this can be reliably pulled from the DOM
                                 uniqueId = (+ new Date() ).toString(36),
-                                tagStart = '<span data-uniqueId="' + uniqueId + '" class="meaning ' + meaning.type + '">',
+                                tagStart = '<span data-uniqueId="' + uniqueId + '" ' +
+                                            'data-start="' + meaning.start + '" ' +
+                                            'data-end="' + meaning.end + '" ' +
+                                            'data-type="' + meaning.type + '" ' +
+                                            'data-description="' + meaning.description + '" ' +
+                                            'class="meaning ' + meaning.type + '"' +
+                                            '>',
                                 tagEnd = '</span>';
 
                             editorEl.html(beforeStart + tagStart + between + tagEnd + afterEnd);
@@ -84,12 +99,35 @@ define(['angular'], function(angular) {
                         }
                     }
 
-                    $scope.$watch('newMeaning', function(newMeaning) {
-                        //Whenever a new meaning is saved from the modal, we need to render it
-                        if(newMeaning) {
-                            insertMeaning(newMeaning);
+                    function stripMeanings() {
+                        var editorEl = getEditorEl();
+                        if(editorEl) {
+                            editorEl.html(utils.string.stripTags(editorEl.html()));
+                        }
+                    }
+
+                    function insertMeanings(meanings) {
+                        //Strip existing meanings
+                        stripMeanings();
+
+                        //Sort and insert
+                        sortMeanings(meanings);
+
+                        if(meanings) {
+                            //Must be reverse inserted or all the text parsing is hosed
+                            //Stupid contenteditables
+                            for(var x = meanings.length - 1; x >= 0; x--) {
+                                insertMeaning(meanings[x]);
+                            }
+                        }
+                    }
+
+                    //Watch for meaning changes
+                    $scope.$watchCollection('model.meanings', function(meanings) {
+                        if(meanings) {
+                            insertMeanings(meanings);
                         } else {
-                            console.log('Not rendering null meaning.');
+                            console.log('Not inserting null meanings');
                         }
                     });
                 },
@@ -158,6 +196,26 @@ define(['angular'], function(angular) {
                                     return;
                                 }
 
+                                //Find all preceding text nodes and offset the start/end by their combined lengths
+                                var currentNode = ancestorContainer[0]
+                                    ,offset = 0;
+
+                                while(currentNode && currentNode.previousSibling)  {
+                                    var sibling = currentNode.previousSibling,
+                                        isText =  sibling instanceof Text;
+                                    
+                                    if(isText) {
+                                        offset += sibling.data.length
+                                    } else {
+                                        offset += sibling.innerHTML.length
+                                    }
+
+                                    currentNode = sibling;
+                                }
+
+                                start += offset;
+                                end += offset;
+
                                 //Create a modal to create the meaning
                                 var modal = createMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
                                     //This is for display reference only - not saved with the meaning
@@ -173,8 +231,13 @@ define(['angular'], function(angular) {
                                     $modalScope.onSubmit = function() {
                                         window.getSelection().removeAllRanges();
 
-                                        //Stash and renderthe Meaning
-                                        $scope.newMeaning = angular.copy($modalScope.model);
+                                        //Stash and render the Meaning
+                                        var newMeaning = angular.copy($modalScope.model);
+                                        if(!$scope.model.meanings) {
+                                            $scope.model.meanings = [ newMeaning ];
+                                        } else {
+                                            $scope.model.meanings.push(newMeaning);
+                                        }
 
                                         try {
                                             //FIXME: ui-boostrap's modals are kind of broke, and this call always throws

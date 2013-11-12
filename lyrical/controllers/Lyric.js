@@ -6,7 +6,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @class
  * @author Joe Cavanagh
  */
-define(['models/Lyric', 'models/Meaning'], function(Lyric, Meaning) {
+define(['async', 'models/Lyric', 'models/Meaning'], function(async, Lyric, Meaning) {
 	'use strict';
 
     return {
@@ -48,10 +48,26 @@ define(['models/Lyric', 'models/Meaning'], function(Lyric, Meaning) {
          */
         put: function(req, res) {
             Lyric.model.find(req.params.id).success(function(lyric) {
-                //Clear out any meanings previously associated
-                lyric.setMeanings([]).success(function() {
-                    lyric.updateAttributes(req.body).success(function(updatedLyric) {
-                        res.json(updatedLyric);
+                //Create meanings
+                //This is done like this since Sequelize's bulk create can't tell me what it created
+                var meaningsToCreate = req.body.meanings.map(function(meaning) {
+                    return function(callback) {
+                        Meaning.model.create(meaning).success(function(newMeaning) {
+                            callback(null, newMeaning);
+                        }).error(function(error) {
+                            callback(true, error);
+                        });
+                    };
+                });
+
+                async.series(meaningsToCreate, function(error, newMeanings) {
+                    //Replace any meanings previously associated
+                    lyric.setMeanings(newMeanings).success(function() {
+                        lyric.updateAttributes(req.body).success(function(updatedLyric) {
+                            res.json(updatedLyric);
+                        }).error(function(error) {
+                            res.status(500).json(error);
+                        });
                     }).error(function(error) {
                         res.status(500).json(error);
                     });

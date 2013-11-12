@@ -20,7 +20,7 @@ define([
         ,associate: function(models) {
             var Lyric = models.Lyric;
             if(Lyric) {
-                Playlist.hasMany(Lyric.model);
+                Playlist.hasMany(Lyric.model, { as: 'Lyrics' });
             } else {
                 console.error('Failed to associate Playlist with Lyric!');
             }

@@ -22,14 +22,14 @@ define([
         ,associate: function(models) {
             var Playlist = models.Playlist;
             if(Playlist) {
-                Lyric.hasMany(Playlist.model);
+                Lyric.hasMany(Playlist.model, { as: 'Playlists' });
             } else {
                 console.error('Failed to associate Lyric with Playlist!');
             }
 
             var Meaning = models.Meaning;
             if(Meaning) {
-                Lyric.hasMany(Meaning.model);
+                Lyric.hasMany(Meaning.model, { as: 'Meanings' });
             } else {
                 console.error('Failed to associate Lyric with Meaning!');
             }

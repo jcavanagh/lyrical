@@ -24,4 +24,11 @@ if [ ! -f ./orm/config/config.json ] && [ -f ./orm/config/config.json.default ]
 fi
 
 # Start!
-node app.js
+# Launch test, client, or app
+if [ "$1" = "debug" ]; then
+    node --debug app.js
+elif [ "$1" = "debug-brk" ]; then
+    node --debug-brk app.js
+else
+    node app.js
+fi
