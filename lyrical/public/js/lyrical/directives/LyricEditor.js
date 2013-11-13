@@ -409,6 +409,27 @@ define(['angular'], function(angular) {
                                     //Do nothing
                                 }
                             };
+
+                            $modalScope.delete = function() {
+                                //Remove old meaning
+                                var index = findMeaning(oldMeaning);
+
+                                if(index !== -1) {
+                                    $scope.model.meanings.splice(index, 1);
+
+                                    window.getSelection().removeAllRanges();
+
+                                    try {
+                                        //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                        //       but seems benign
+                                        $modalInstance.dismiss();
+                                    } catch(e) {
+                                        //Do nothing
+                                    }
+                                } else {
+                                    console.error('Could not remove old meaning when deleting!');
+                                }
+                            };
                         }]);
                     };
                 }
