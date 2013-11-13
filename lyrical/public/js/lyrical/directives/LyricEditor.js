@@ -11,7 +11,7 @@ define(['angular'], function(angular) {
     
     return angular.module('lyrical.directives').directive(
         'lyriceditor',
-        function(utils) {
+        function($compile, utils) {
             return {
                 replace: true,
                 restrict: 'E',
@@ -39,11 +39,8 @@ define(['angular'], function(angular) {
 
                             for(var x = 0; x < children.length; x++) {
                                 var el = children[x],
-                                    html = editorEl.html(),
-                                    elHtml = el.outerHTML,
-                                    elText = el.innerHTML,
-                                    start = parseInt(el.getAttribute('data-start')),
-                                    end = parseInt(el.getAttribute('data-end')),
+                                    start = parseInt(el.getAttribute('data-start'), 10),
+                                    end = parseInt(el.getAttribute('data-end'), 10),
                                     description = el.getAttribute('data-description'),
                                     type = el.getAttribute('data-type');
 
@@ -82,9 +79,8 @@ define(['angular'], function(angular) {
                             var beforeStart = html.substr(0, meaning.start),
                                 between = text.substr(meaning.start, meaning.end - meaning.start),
                                 afterEnd = html.substr(meaning.end),
-                                //Invent a meaningless unique ID so this can be reliably pulled from the DOM
-                                uniqueId = (+ new Date() ).toString(36),
-                                tagStart = '<span data-uniqueId="' + uniqueId + '" ' +
+                                tagStart = '<span ' +
+                                            'ng-click="meaningClick()" ' + 
                                             'data-start="' + meaning.start + '" ' +
                                             'data-end="' + meaning.end + '" ' +
                                             'data-type="' + meaning.type + '" ' +
@@ -93,7 +89,17 @@ define(['angular'], function(angular) {
                                             '>',
                                 tagEnd = '</span>';
 
+                            //Re-append all the things
+                            editorEl.contents().remove();
                             editorEl.html(beforeStart + tagStart + between + tagEnd + afterEnd);
+                            $compile(editorEl.contents())($scope);
+
+                            //FIXME: Angular inserts a bunch of garbage span tags around root-level text nodes
+                            //       when compiling.  Need to strip those out or everything dies.
+                            editorEl.find('span[class="ng-scope"]').each(function(idx, garbageEl) {
+                                var el = angular.element(garbageEl);
+                                el.replaceWith(el.text());
+                            });
                         } else {
                             console.error('Could not find lyric editor element!');
                         }
@@ -130,6 +136,10 @@ define(['angular'], function(angular) {
                             console.log('Not inserting null meanings');
                         }
                     });
+
+                    $scope.meaningClick = function() {
+                        console.log('meaning clicked link!');
+                    }
                 },
                 controller: function($scope, $modal, $element) {
                     //Tool/mouse state
@@ -193,6 +203,10 @@ define(['angular'], function(angular) {
                                         type: 'danger'
                                         ,msg: 'Meanings cannot overlap!'
                                     };
+
+                                    //Clear selections
+                                    window.getSelection().removeAllRanges();
+
                                     return;
                                 }
 
@@ -205,9 +219,9 @@ define(['angular'], function(angular) {
                                         isText =  sibling instanceof Text;
                                     
                                     if(isText) {
-                                        offset += sibling.data.length
+                                        offset += sibling.data.length;
                                     } else {
-                                        offset += sibling.innerHTML.length
+                                        offset += sibling.innerHTML.length;
                                     }
 
                                     currentNode = sibling;

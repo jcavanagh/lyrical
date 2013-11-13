@@ -27,6 +27,17 @@ body {
   color: #FF0000;
   text-decoration: line-through; }
 
+/* line 1, ../sass/lyrical/_meaning.scss */
+.meaning {
+  cursor: pointer; }
+  /* line 4, ../sass/lyrical/_meaning.scss */
+  .meaning:hover {
+    border: 1px solid;
+    border-radius: 3px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box; }
+
 /* line 1, ../sass/lyrical/_misc.scss */
 .cursor-default {
   cursor: default; }
