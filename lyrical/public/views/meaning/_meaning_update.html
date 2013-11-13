@@ -1,0 +1,60 @@
+<div>
+    <div class="modal-header">
+        <h3>Editing Meaning</h3>
+    </div>
+    <div class="modal-body">
+        <form class="form-horizontal" role="form">
+            <div class="form-group">
+                <div class="container">
+                    Text: {{ meaningText }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Importance:</label>
+                <button type="button" class="lyric-super-important glyphicon glyphicon-pencil"
+                    ng-class="{'lyric-tool-selected': model.type == 'lyric-super-important'}"
+                    popover="Super important"
+                    popover-placement="top"
+                    popover-trigger="mouseenter"
+                    ng-click="toolClick('lyric-super-important')"
+                ></button>
+                <button type="button" class="lyric-important glyphicon glyphicon-pencil"
+                    ng-class="{'lyric-tool-selected': model.type == 'lyric-important'}"
+                    popover="Important"
+                    popover-placement="top"
+                    popover-trigger="mouseenter"
+                    ng-click="toolClick('lyric-important')"
+                ></button>
+                <button type="button" class="lyric-neutral glyphicon glyphicon-pencil"
+                    ng-class="{'lyric-tool-selected': model.type == 'lyric-neutral'}"
+                    popover="Neutral"
+                    popover-placement="top"
+                    popover-trigger="mouseenter"
+                    ng-click="toolClick('lyric-neutral')"
+                ></button>
+                <button type="button" class="lyric-unimportant glyphicon glyphicon-pencil"
+                    ng-class="{'lyric-tool-selected': model.type == 'lyric-unimportant'}"
+                    popover="Unimportant"
+                    popover-placement="top"
+                    popover-trigger="mouseenter"
+                    ng-click="toolClick('lyric-unimportant')"
+                ></button>
+                <button type="button" class="lyric-irrelevant glyphicon glyphicon-pencil"
+                    ng-class="{'lyric-tool-selected': model.type == 'lyric-irrelevant'}"
+                    popover="Irrelevant"
+                    popover-placement="top"
+                    popover-trigger="mouseenter"
+                    ng-click="toolClick('lyric-irrelevant')"
+                ></button>
+            </div>
+            <div class="form-group">
+                <label>What does it mean?</label>
+                <textarea class="form-control" ng-model="model.description" required></textarea>
+            </div>
+        </form>
+    </div>
+    <div class="modal-footer">
+        <button class="btn btn-primary" ng-click="onSubmit()">Insert</button>
+        <button class="btn btn-warning" ng-click="onCancel()">Cancel</button>
+    </div>
+</div>

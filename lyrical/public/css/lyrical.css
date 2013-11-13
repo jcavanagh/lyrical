@@ -27,6 +27,10 @@ body {
   color: #FF0000;
   text-decoration: line-through; }
 
+/* line 22, ../sass/lyrical/_lyric.scss */
+.lyric-tool-selected {
+  box-shadow: 0 0 2px black; }
+
 /* line 1, ../sass/lyrical/_meaning.scss */
 .meaning {
   cursor: pointer; }
