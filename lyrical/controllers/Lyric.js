@@ -78,16 +78,23 @@ define(['async', 'models/Lyric', 'models/Meaning'], function(async, Lyric, Meani
                         return;
                     }
 
-                    //Replace any meanings previously associated
-                    lyric.setMeanings(newMeanings).success(function() {
+                    //This will be called after updating meanings or skipping it
+                    var updateLyric = function() {
                         lyric.updateAttributes(req.body).success(function(updatedLyric) {
                             res.json(updatedLyric);
                         }).error(function(error) {
                             res.status(500).json(error);
                         });
-                    }).error(function(error) {
-                        res.status(500).json(error);
-                    });
+                    };
+
+                    //Replace any meanings previously associated
+                    if(newMeanings.length) {
+                        lyric.setMeanings(newMeanings).success(updateLyric).error(function(error) {
+                            res.status(500).json(error);
+                        });
+                    } else {
+                        updateLyric();
+                    }
                 });
             }).error(function(error) {
                 res.status(500).json(error);
