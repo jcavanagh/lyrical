@@ -12,6 +12,7 @@ define([
 
     var Lyric = orm.define('Lyric', {
         title: orm.STRING,
+        description: orm.TEXT,
         text: orm.TEXT,
         youtubeUrl: orm.STRING,
         soundcloudUrl: orm.STRING

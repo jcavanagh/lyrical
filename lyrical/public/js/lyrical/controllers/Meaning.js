@@ -11,9 +11,7 @@ define(['angular'], function(angular) {
     return angular.module('lyrical.controllers')
         .controller('MeaningCreateCtl', function($scope, $route, $location, MeaningResource) {
             $scope.create = function() {
-                MeaningResource.save({
-                    title: $scope.model.title
-                }, function(meaning) {
+                MeaningResource.save($scope.model, function(meaning) {
                     $location.path('/meanings/' + meaning.id);
                 });
             };

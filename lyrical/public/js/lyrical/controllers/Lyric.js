@@ -11,9 +11,7 @@ define(['angular'], function(angular) {
     return angular.module('lyrical.controllers')
         .controller('LyricCreateCtl', function($scope, $route, $location, LyricResource) {
             $scope.create = function() {
-                LyricResource.save({
-                    title: $scope.model.title
-                }, function(lyric) {
+                LyricResource.save($scope.model, function(lyric) {
                     $location.path('/lyrics/' + lyric.id);
                 });
             };
