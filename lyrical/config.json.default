@@ -1,8 +1,10 @@
 {
 	"server": {
 		"port": 3002,
-        "cookieSecret": "replace me"
+        "cookieSecret": "replace me",
+        "sessionSecret": "replace me"
 	},
 
-	"developmentMode": false
+	"developmentMode": false,
+    "forceSync": false
 }
