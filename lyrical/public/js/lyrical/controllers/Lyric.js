@@ -44,5 +44,25 @@ define(['angular'], function(angular) {
             $scope.select = function(lyric) {
                 $location.path('/lyrics/' + lyric.id);
             };
+        })
+        .controller('LyricShowCtl', function($scope, $route, $location, LyricResource, PlaylistLyricResource) {
+            var lyricId = $route.current.params.id;
+
+            $scope.model = LyricResource.get({ id: lyricId });
+
+            $scope.edit = function() {
+                $location.path('/lyrics/' + lyricId + '/edit');
+            };
+
+            $scope.addToPlaylist = function(playlist, event) {
+                //Prevent the row click handler from tripping
+                event.stopPropagation();
+
+                //Add to playlist
+                PlaylistLyricResource.create({
+                    playlistId: playlist.id,
+                    lyricId: lyricId
+                });
+            };
         });
 });

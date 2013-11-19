@@ -54,13 +54,13 @@ define(['angular'], function(angular) {
 
             $scope.edit = function() {
                 $location.path('/playlists/' + playlistId + '/edit');
-            }
+            };
 
             $scope.select = function(lyric) {
                 $location.path('/lyrics/' + lyric.id);
             };
 
-            $scope.remove = function(lyric, event) {
+            $scope.removeFromPlaylist = function(lyric, event) {
                 //Prevent the row click handler from tripping
                 event.stopPropagation();
 

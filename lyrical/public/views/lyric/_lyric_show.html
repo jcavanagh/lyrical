@@ -1,1 +1,17 @@
-Lyric goes here
+<div ng-controller="LyricShowCtl">
+    <div class="container" ng-hide="model.id">
+        Could not find a lyric with that ID!
+    </div>
+    <div class="container" ng-show="model.id">
+        <div class="page-header">
+            <h2><span>{{ model.title }}</span>
+                <div class="button-group pull-right" style="display:inline-block">
+                    <a ng-click="edit()" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </a>
+                </div>
+            </h2>
+        </div>
+        <!-- Render lyric here -->
+    </div>
+</div>

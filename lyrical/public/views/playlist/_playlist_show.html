@@ -4,7 +4,7 @@
     </div>
     <div class="container" ng-show="model.id">
         <div class="page-header">
-            <h2><span ng-model="model.title" contenteditable strip-br="true" no-line-breaks="true"></span>
+            <h2><span>{{ model.title }}</span>
                 <div class="button-group pull-right" style="display:inline-block">
                     <a ng-click="edit()" class="btn btn-warning">
                         <span class="glyphicon glyphicon-pencil"></span> Edit
@@ -32,7 +32,7 @@
                         <a ng-show="lyric.soundcloudUrl"class="soundcloud-logo" href="{{ lyric.soundcloudUrl }}" target="_blank"></a>
                     </td>
                     <td>
-                        <span ng-click="remove(lyric, $event)" class="glyphicon glyphicon-remove-circle cursor-pointer"></span>
+                        <span ng-click="removeFromPlaylist(lyric, $event)" class="glyphicon glyphicon-remove-circle cursor-pointer"></span>
                     </td>
                 </tr>
             </tbody>
