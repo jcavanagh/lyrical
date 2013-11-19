@@ -61,8 +61,6 @@ define([
                                 modelObjs[modelName] = arg;
                             });
 
-                            console.log(modelObjs);
-
                             //Associate models if we need to
                             _.each(modelObjs, function(model) {
                                 if(_.isFunction(model.associate)) {

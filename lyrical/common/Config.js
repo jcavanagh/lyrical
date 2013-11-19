@@ -8,9 +8,10 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  */
 define([
     'underscore',
+    'async',
     'fs',
     'path'
-], function(_, fs, path) {
+], function(_, async, fs, path) {
     'use strict';
     
     var CONFIG_PATH = path.join(__dirname, '..', 'config.json')
@@ -152,42 +153,51 @@ define([
          */
         ,readConfig: function(callback) {
             //Get file handle, read, and parse
-            var me = this;
+            var me = this,
+                fileLoadFns = [];
 
             me.config = {};
 
             _.each(_.pairs(me.configPaths), function(kv, index, list) {
                 var key = kv[0],
-                    path = kv[1];
+                    path = kv[1],
+                    generator = function(key, path) {
+                        return function(callback) {
+                            fs.readFile(path, function(err, data) {
+                                if(err) {
+                                    console.error('Error loading config:');
+                                    console.error(err);
+                                    return;
+                                }
 
-                fs.readFile(path, function(err, data) {
-                    if(err) {
-                        console.error('Error loading config:');
-                        console.error(err);
-                        return;
-                    }
+                                //Load config
+                                try {
+                                    me.config[key] = JSON.parse(data.toString());
+                                } catch(e) {
+                                    console.error('Failed to parse config file:', path);
+                                    console.error(e);
+                                }
 
-                    //Load config
-                    try {
-                        me.config[key] = JSON.parse(data.toString());
+                                //Execute callback
+                                if(callback && typeof callback === 'function') {
+                                    callback.apply(me);
+                                }
+                            });
+                        };
+                    };
 
-                        //Fire initial load
-                        if(index == list.length - 1) {
-                            if(!me.configLoaded) {
-                                me.configLoaded = true;
-                                me.onConfigLoaded();
-                            }
-                        }
-                    } catch(e) {
-                        console.error('Failed to parse config file:', path);
-                        console.error(e);
-                    }
+                fileLoadFns.push(generator(key, path));
+            });
 
-                    //Execute callback
-                    if(callback && typeof callback === 'function') {
-                        callback.apply(me);
-                    }
-                });
+            //Load all files, fire load when done
+            async.parallel(fileLoadFns, function() {
+                //Fire initial load
+                if(!me.configLoaded) {
+                    me.configLoaded = true;
+                    me.onConfigLoaded();
+                }
+
+                console.log(me.config);
             });
         }
     };
