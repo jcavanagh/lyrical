@@ -108,7 +108,7 @@ define(['angular'], function(angular) {
                     function stripMeanings() {
                         var editorEl = getEditorEl();
                         if(editorEl) {
-                            editorEl.html(utils.string.stripTags(editorEl.html()));
+                            editorEl.html(utils.string.stripTags(editorEl.html(), '<div><br>'));
                         }
                     }
 
