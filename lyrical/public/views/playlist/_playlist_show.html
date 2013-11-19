@@ -1,0 +1,41 @@
+<div ng-controller="PlaylistShowCtl">
+    <div class="container" ng-hide="model.id">
+        Could not find a playlist with that ID!
+    </div>
+    <div class="container" ng-show="model.id">
+        <div class="page-header">
+            <h2><span ng-model="model.title" contenteditable strip-br="true" no-line-breaks="true"></span>
+                <div class="button-group pull-right" style="display:inline-block">
+                    <a ng-click="edit()" class="btn btn-warning">
+                        <span class="glyphicon glyphicon-pencil"></span> Edit
+                    </a>
+                </div>
+            </h2>
+        </div>
+        <p ng-show="!model.lyrics || !model.lyrics.length">This playlist has no lyrics - add some from the lyrics list!</p>
+        <table ng-show="model.lyrics && model.lyrics.length" class="table table-hover">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Links</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr ng-repeat="lyric in model.lyrics" ng-click="select(lyric);">
+                    <td>{{ lyric.title }}</td>
+                    <td>{{ lyric.description }}</td>
+                    <td>
+                        <a ng-show="lyric.youtubeUrl" class="youtube-logo" href="{{ lyric.youtubeUrl }}" target="_blank"></a>
+                        <span style="margin: 2.5px"></span>
+                        <a ng-show="lyric.soundcloudUrl"class="soundcloud-logo" href="{{ lyric.soundcloudUrl }}" target="_blank"></a>
+                    </td>
+                    <td>
+                        <span ng-click="remove(lyric, $event)" class="glyphicon glyphicon-remove-circle cursor-pointer"></span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

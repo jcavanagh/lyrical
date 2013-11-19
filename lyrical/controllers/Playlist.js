@@ -6,7 +6,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @class
  * @author Joe Cavanagh
  */
-define(['models/Playlist'], function(Playlist) {
+define(['models/Playlist', 'models/Lyric'], function(Playlist, Lyric) {
 	'use strict';
 
     return {
@@ -25,7 +25,7 @@ define(['models/Playlist'], function(Playlist) {
          * GET /playlist/:id
          */
         get: function(req, res) {
-            Playlist.model.find(req.params.id).success(function(playlist) {
+            Playlist.model.find({ where: { id: req.params.id }, include: [ Lyric.model ] }).success(function(playlist) {
                 res.json(playlist);
             }).error(function(error) {
                 res.status(500).json(error);

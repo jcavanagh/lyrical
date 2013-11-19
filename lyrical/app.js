@@ -28,6 +28,11 @@ define([
 ) {
     'use strict';
 
+    //LEFT SIDE!  MANY EXCEPTIONS!  HANDLE IT!
+    process.on('uncaughtException', function(err) {
+        console.error('UNCAUGHT EXCEPTION: ', err);
+    });
+
     //Lyrical!
     var app = express();
 
@@ -76,8 +81,9 @@ define([
                         'controllers/index',
                         'controllers/Lyric',
                         'controllers/Meaning',
-                        'controllers/Playlist'
-                    ], function(index, Lyric, Meaning, Playlist) {
+                        'controllers/Playlist',
+                        'controllers/PlaylistLyric'
+                    ], function(index, Lyric, Meaning, Playlist, PlaylistLyric) {
                         //Index
                         app.get('/', index.index);
 
@@ -101,6 +107,10 @@ define([
                         app.post('/api/playlists', Playlist.post);
                         app.put('/api/playlists/:id', Playlist.put);
                         app.delete('/api/playlists/:id', Playlist.delete);
+
+                        //PlaylistLyric
+                        app.post('/api/playlists/:playlistId/lyric/:lyricId', PlaylistLyric.post);
+                        app.delete('/api/playlists/:playlistId/lyric/:lyricId', PlaylistLyric.delete);
 
                         //Start server
                         http.createServer(app).listen(app.get('port'), function(){

@@ -32,7 +32,7 @@ define([
 
         //Lyric routes
         $routeProvider.when('/lyrics', {
-            templateUrl: '/views/lyric/_lyric.html'
+            templateUrl: '/views/lyric/_lyric_list.html'
         });
 
         $routeProvider.when('/lyrics/create', {
@@ -40,12 +40,16 @@ define([
         });
 
         $routeProvider.when('/lyrics/:id', {
+            templateUrl: '/views/lyric/_lyric_show.html'
+        });
+
+        $routeProvider.when('/lyrics/:id/edit', {
             templateUrl: '/views/lyric/_lyric_update.html'
         });
 
         //Playlist routes
         $routeProvider.when('/playlists', {
-            templateUrl: '/views/playlist/_playlist.html'
+            templateUrl: '/views/playlist/_playlist_list.html'
         });
 
         $routeProvider.when('/playlists/create', {
@@ -53,6 +57,10 @@ define([
         });
 
         $routeProvider.when('/playlists/:id', {
+            templateUrl: '/views/playlist/_playlist_show.html'
+        });
+
+        $routeProvider.when('/playlists/:id/edit', {
             templateUrl: '/views/playlist/_playlist_update.html'
         });
     });

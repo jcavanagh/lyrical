@@ -12,7 +12,8 @@ define(['angular'], function(angular) {
         .controller('LyricCreateCtl', function($scope, $route, $location, LyricResource) {
             $scope.create = function() {
                 LyricResource.save($scope.model, function(lyric) {
-                    $location.path('/lyrics/' + lyric.id);
+                    //Go to editor
+                    $location.path('/lyrics/' + lyric.id + '/edit');
                 });
             };
         })

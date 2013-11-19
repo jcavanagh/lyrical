@@ -14,6 +14,7 @@ define(['angular'], function(angular) {
                 PlaylistResource.save({
                     title: $scope.model.title
                 }, function(playlist) {
+                    //Go to editor
                     $location.path('/playlists/' + playlist.id);
                 });
             };
@@ -44,6 +45,30 @@ define(['angular'], function(angular) {
 
             $scope.select = function(playlist) {
                 $location.path('/playlists/' + playlist.id);
+            };
+        })
+        .controller('PlaylistShowCtl', function($scope, $route, $location, PlaylistResource, PlaylistLyricResource) {
+            var playlistId = $route.current.params.id;
+
+            $scope.model = PlaylistResource.get({ id: playlistId });
+
+            $scope.edit = function() {
+                $location.path('/playlists/' + playlistId + '/edit');
+            }
+
+            $scope.select = function(lyric) {
+                $location.path('/lyrics/' + lyric.id);
+            };
+
+            $scope.remove = function(lyric, event) {
+                //Prevent the row click handler from tripping
+                event.stopPropagation();
+
+                //Remove from playlist
+                PlaylistLyricResource.delete({
+                    playlistId: playlistId,
+                    lyricId: lyric.id
+                });
             };
         });
 });
