@@ -62,6 +62,44 @@ define([], function() {
                         });
                     });
 
+                    $element.bind('keypress', function(e) {
+                        //Ensure the last element of the CE is always a BR, to replicate expected enter key behavior
+                        var childCount = $element.contents().length
+                            ,lastChild =  childCount ? $element.contents()[childCount - 1] : null;
+
+                        if (!lastChild || lastChild.nodeName.toLowerCase() != "br") {
+                            $element.append(document.createElement("br"));
+                        }
+
+                        //Snag the enter event to prevent the divs from being inserted
+                        if(e.which == 13) {
+                            e.preventDefault();
+                            e.stopPropagation();
+
+                            //Intercept enter press
+                            $scope.$apply(function() {
+                                if(attrs.brAsBreak !== 'false') {
+                                    //http://stackoverflow.com/questions/3080529/make-a-br-instead-of-div-div-by-pressing-enter-on-a-contenteditable
+                                    var selection = window.getSelection(),
+                                        range = selection.rangeCount ? selection.getRangeAt(0) : null,
+                                        br = document.createElement("br");
+
+                                    if(range) {
+                                        range.deleteContents();
+                                        range.insertNode(br);
+                                        range.setStartAfter(br);
+                                        range.setEndAfter(br);
+                                        range.collapse(false);
+                                        selection.removeAllRanges();
+                                        selection.addRange(range);
+                                    }
+
+                                    return false;
+                                }
+                            });
+                        }
+                    });
+
                     $element.bind('paste', function(e) {
                         $scope.$apply(function() {
                             var clipboardData = e.clipboardData || e.originalEvent.clipboardData,
@@ -72,6 +110,9 @@ define([], function() {
                             if(attrs.stripOnPaste && attrs.stripOnPaste !== 'false') {
                                 //Sanitize input
                                 pasteData = utils.string.stripTags(pasteData);
+
+                                //Replace newlines with <br> tags
+                                pasteData = pasteData.replace(/\n/g, '<br>');
 
                                 try {
                                     var range = window.getSelection().getRangeAt(0);

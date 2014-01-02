@@ -41,12 +41,16 @@ define(['angular'], function(angular) {
                                 var el = children[x],
                                     start = parseInt(el.getAttribute('data-start'), 10),
                                     end = parseInt(el.getAttribute('data-end'), 10),
-                                    description = el.getAttribute('data-description'),
+                                    startLine = parseInt(el.getAttribute('data-start-line'), 10),
+                                    endLine = parseInt(el.getAttribute('data-end-line'), 10),
+                                    line = el.getAttribute('data-description'),
                                     type = el.getAttribute('data-type');
 
                                 meanings.push({
                                     start: start,
                                     end: end,
+                                    startLine: startLine,
+                                    endLine: endLine,
                                     description: description,
                                     type: type
                                 });
@@ -58,31 +62,33 @@ define(['angular'], function(angular) {
                         return meanings;
                     }
 
+                    function cleanMeaningMarkup(html) {
+                        if(html) {
+                            //Strip non line break tags
+                            return utils.string.stripTags(html, '<br>');
+                        }
+
+                        return '';
+                    }
+
                     //Insert meanings into the editor markup
                     function insertMeaning(meaning) {
                         //Insert a meaning into the lyric view
                         var editorEl = getEditorEl();
                         if(editorEl) {
                             var html = editorEl.html(),
-                                textNodes = editorEl.contents().filter(function(idx, val) {
-                                    return val instanceof Text;
-                                }),
-                                text = '';
-
-                            //Loop text nodes and create the string of non-wrapped data
-                            //FIXME: It sure would be nice if jQuery had a reduce function
-                            textNodes.each(function(idx, node) {
-                                text += node.data;
-                            });
+                                text = cleanMeaningMarkup(html)
 
                             //Snip out substrings and create highlight elements
                             var beforeStart = html.substr(0, meaning.start),
-                                between = text.substr(meaning.start, meaning.end - meaning.start),
+                                between = text.substr(meaning.start, meaning.end - meaning.start + 1),
                                 afterEnd = html.substr(meaning.end),
                                 tagStart = '<span ' +
                                             'ng-click="meaningClick($event)" ' +
                                             'data-start="' + meaning.start + '" ' +
                                             'data-end="' + meaning.end + '" ' +
+                                            'data-start-line="' + meaning.startLine + '" ' +
+                                            'data-end-line="' + meaning.endLine + '" ' +
                                             'data-type="' + meaning.type + '" ' +
                                             'data-description="' + meaning.description + '" ' +
                                             'class="meaning ' + meaning.type + '"' +
@@ -105,16 +111,10 @@ define(['angular'], function(angular) {
                         }
                     }
 
-                    function stripMeanings() {
-                        var editorEl = getEditorEl();
-                        if(editorEl) {
-                            editorEl.html(utils.string.stripTags(editorEl.html(), '<div><br>'));
-                        }
-                    }
-
                     function insertMeanings(meanings) {
-                        //Strip existing meanings
-                        stripMeanings();
+                        //Strip existing meanings from editor
+                        var editorEl = getEditorEl()
+                        editorEl.html(cleanMeaningMarkup(editorEl.html()));
 
                         //Sort and insert
                         sortMeanings(meanings);
@@ -214,11 +214,35 @@ define(['angular'], function(angular) {
                                 var text = sel.toString(),
                                     start = range.startOffset,
                                     end = start + range.toString().length,
-                                    ancestorContainer = angular.element(range.commonAncestorContainer);
+                                    startLine = 0,
+                                    endLine = 0;
 
-                                //If the range's common ancestor container is the lyric editor, then
-                                //we are intersecting an existing meaning element.  Don't allow this.
-                                if(ancestorContainer.hasClass('lyriceditor')) {
+                                //Test to see if the range intersects any nodes that aren't text or line breaks
+                                //If it does, that means we intersect another meaning, which is not allowed
+                                var nodes = range.cloneContents();
+
+                                var intersects = false;
+                                if(nodes) {
+                                    for(var x = 0; x < nodes.childNodes.length; x++) {
+                                        var node = nodes.childNodes[x];
+                                        if(node) {
+                                            var isLineBreak = node.nodeName.toLowerCase() == "br";
+
+                                            //Check for text node or line break
+                                            if(!(node instanceof Text) && !isLineBreak) {
+                                                intersects = true;
+                                                break;
+                                            }
+
+                                            //If if is a line break, increment the endLine counter
+                                            if(isLineBreak) {
+                                                endLine++;
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if(intersects) {
                                     $scope.alerts[0] = {
                                         type: 'danger'
                                         ,msg: 'Meanings cannot overlap!'
@@ -231,15 +255,19 @@ define(['angular'], function(angular) {
                                 }
 
                                 //Find all preceding text nodes and offset the start/end by their combined lengths
-                                var currentNode = ancestorContainer[0]
+                                var currentNode = range.startContainer
                                     ,offset = 0;
 
                                 while(currentNode && currentNode.previousSibling)  {
                                     var sibling = currentNode.previousSibling,
-                                        isText =  sibling instanceof Text;
+                                        isText = sibling instanceof Text
+                                        isLineBreak = sibling.nodeName.toLowerCase() == "br";
                                     
                                     if(isText) {
                                         offset += sibling.data.length;
+                                    } else if (isLineBreak) {
+                                        //Increment the start line counter
+                                        startLine++;
                                     } else {
                                         offset += sibling.innerHTML.length;
                                     }
@@ -249,6 +277,9 @@ define(['angular'], function(angular) {
 
                                 start += offset;
                                 end += offset;
+
+                                //Add the startLine to the endLine, since the endLine is done before and does not include preceding nodes
+                                endLine += startLine;
 
                                 //Create a modal to create the meaning
                                 var modal = showCreateMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
@@ -260,6 +291,8 @@ define(['angular'], function(angular) {
                                     $modalScope.model.type = activeTool;
                                     $modalScope.model.start = start;
                                     $modalScope.model.end = end;
+                                    $modalScope.model.startLine = startLine;
+                                    $modalScope.model.endLine = endLine;
                                     $modalScope.model.LyricId = $scope.model.id;
 
                                     $modalScope.onSubmit = function() {
@@ -353,6 +386,8 @@ define(['angular'], function(angular) {
                                     type: eventEl.attr('data-type')
                                     ,start: eventEl.attr('data-start')
                                     ,end: eventEl.attr('data-end')
+                                    ,startLine: eventEl.attr('data-start-line')
+                                    ,endLine: eventEl.attr('data-end-line')
                                     ,description: eventEl.attr('data-description')
                                 };
 
@@ -362,6 +397,8 @@ define(['angular'], function(angular) {
                             $modalScope.model.type = oldMeaning.type;
                             $modalScope.model.start = oldMeaning.start;
                             $modalScope.model.end = oldMeaning.end;
+                            $modalScope.model.startLine = oldMeaning.startLine;
+                            $modalScope.model.endLine = oldMeaning.endLine;
                             $modalScope.model.description = oldMeaning.description;
 
                             $modalScope.toolClick = function(type) {

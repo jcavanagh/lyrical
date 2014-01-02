@@ -9,9 +9,18 @@ define([
     'orm/orm'
 ], function(orm) {
     var Meaning = orm.define('Meaning', {
+        //The line on which it starts and ends
+        startLine: orm.INTEGER,
+        endLine: orm.INTEGER,
+
+        //The character index at which it starts/ends, on its start/end line
         start: orm.INTEGER,
         end: orm.INTEGER,
+
+        //The meaning importance
         type: orm.STRING,
+
+        //What it means
         description: orm.TEXT
     });
 

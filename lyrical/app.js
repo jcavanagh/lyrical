@@ -30,7 +30,7 @@ define([
 
     //LEFT SIDE!  MANY EXCEPTIONS!  HANDLE IT!
     process.on('uncaughtException', function(err) {
-        console.error('UNCAUGHT EXCEPTION: ', err);
+        console.error('UNCAUGHT EXCEPTION: ', err, err.stack);
     });
 
     //Lyrical!
@@ -53,7 +53,7 @@ define([
         require(['orm/orm', 'common/ModelLoader'], function(orm, ModelLoader) {
             ModelLoader.loadAll(function() {
                 var forceSync = Config.get('lyrical.forceSync') || false;
-                orm.sync({ force: forceSync }).success(function() {
+                orm.sync({ force: forceSync, logging: true }).success(function() {
                     //Set server port
                     app.set('port', Config.get('lyrical.server.port') || 3002);
 
