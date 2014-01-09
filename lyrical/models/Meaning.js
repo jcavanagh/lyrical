@@ -9,11 +9,7 @@ define([
     'orm/orm'
 ], function(orm) {
     var Meaning = orm.define('Meaning', {
-        //The line on which it starts and ends
-        startLine: orm.INTEGER,
-        endLine: orm.INTEGER,
-
-        //The character index at which it starts/ends, on its start/end line
+        //The character index at which it starts/ends, relative to the entire lyric text
         start: orm.INTEGER,
         end: orm.INTEGER,
 
