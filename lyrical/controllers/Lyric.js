@@ -59,75 +59,36 @@ define(['sequelize', 'models/Lyric', 'models/Meaning'], function(Sequelize, Lyri
                 }
             }
 
+            //This will blow up the Lyric update if it's still on the body
+            delete req.body.meanings;
+
             //Update lyric
             chainer.add( Lyric.model.update(req.body, { id: req.params.id }) );
 
             chainer.run().success(function(results) {
-                //Associate meanings to updated lyric
-                debugger;
+                //First result is destroying old Meanings
+                //Last result is update Lyric
+                //Rest are new Meanings
+                var newMeanings = [];
+                for(var x = 1; x < results.length; x++) {
+                    //Stash all but the last, loop starts at one
+                    if(x < results.length - 1) {
+                        newMeanings.push(results[x]);
+                    }
+                }
 
-                //Return
-                res.status(200).json({});
+                //Associate meanings to updated lyric
+                Lyric.model.find(req.params.id).success(function(lyric) {
+                    lyric.setMeanings(newMeanings);
+                    res.status(200).json({})
+                }).error(function(error) {
+                    console.error('Error associating lyric meanings:', error, error.stack);
+                    res.status(500).json(error);
+                });
             }).error(function(error) {
                 console.error('Error updating lyric:', error, error.stack);
                 res.status(500).json(error);
             });
-
-
-            // Lyric.model.find(req.params.id).success(function(lyric) {
-            //     //Create meanings
-            //     //This is done like this since Sequelize's bulk create can't tell me what it created
-            //     var meaningsToCreate = req.body.meanings.map(function(meaning) {
-            //         return function(callback) {
-            //             Meaning.model.find(meaning.id).success(function(foundMeaning) {
-            //                 if(meaning.id && foundMeaning) {
-            //                     //If we found one, super
-            //                     callback(null, foundMeaning);
-            //                 } else {
-            //                     //Otherwise, create it
-            //                     Meaning.model.create(meaning).success(function(newMeaning) {
-            //                         callback(null, newMeaning);
-            //                     }).error(function(error) {
-            //                         callback(true, error);
-            //                     });
-            //                 }
-            //             }).error(function(error) {
-            //                 callback(true, error);
-            //             });
-            //         };
-            //     });
-
-            //     //This will be called after updating meanings
-            //     var updateLyric = function() {
-            //         lyric.updateAttributes(req.body).success(function(updatedLyric) {
-            //             res.json(updatedLyric);
-            //         }).error(function(error) {
-            //             res.status(500).json(error);
-            //         });
-            //     };
-
-            //     if(meaningsToCreate.length) {
-            //         async.series(meaningsToCreate, function(error, newMeanings) {
-            //             newMeanings = newMeanings || [];
-                        
-            //             if(error) {
-            //                 var msg = 'Error updating lyric meanings:', error;
-            //                 console.error(msg);
-            //                 res.status(500).json(msg);
-            //                 return;
-            //             }
-
-            //             //Replace any meanings previously associated
-            //             lyric.setMeanings(newMeanings).success(updateLyric).error(function(error) {
-            //                 res.status(500).json(error);
-            //             });
-            //         });
-            //     } else {
-            //         updateLyric();
-            //     }
-            // }).error(function(error) {
-            //     res.status(500).json(error);
-            // });
         },
 
         /*

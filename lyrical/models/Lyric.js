@@ -30,7 +30,7 @@ define([
 
             var Meaning = models.Meaning;
             if(Meaning) {
-                Lyric.hasMany(Meaning.model, { as: 'Meanings' });
+                Lyric.hasMany(Meaning.model, { as: 'Meanings', onDelete: 'cascade' });
             } else {
                 console.error('Failed to associate Lyric with Meaning!');
             }
