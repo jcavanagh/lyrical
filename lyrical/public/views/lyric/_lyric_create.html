@@ -13,12 +13,30 @@
             <div class="form-group">
                 <label class="col-md-2 control-label">Description</label>
                 <div class="col-md-10">
-                    <input ng-model="model.description" required type="text" class="form-control" placeholder="Description">
+                    <input ng-model="model.description" type="text" class="form-control" placeholder="Description">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">SoundCloud URL</label>
+                <div class="col-md-10">
+                    <input ng-model="model.soundcloudUrl" type="text" class="form-control" placeholder="SoundCloud URL">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">YouTube URL</label>
+                <div class="col-md-10">
+                    <input ng-model="model.youtubeUrl" type="text" class="form-control" placeholder="YouTube URL">
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-md-2 control-label">Lyrics</label>
+                <div class="col-md-10">
+                    <textarea ng-model="model.text" class="form-control" rows=20></textarea>
                 </div>
             </div>
             <div class="form-group">
                 <div class="col-md-offset-2 col-md-10">
-                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <button type="submit" class="btn btn-primary">Save</button>
                 </div>
             </div>
         </form>

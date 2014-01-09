@@ -13,7 +13,7 @@ define(['angular'], function(angular) {
             $scope.create = function() {
                 LyricResource.save($scope.model, function(lyric) {
                     //Go to editor
-                    $location.path('/lyrics/' + lyric.id + '/edit');
+                    $location.path('/lyrics/' + lyric.id);
                 });
             };
         })
