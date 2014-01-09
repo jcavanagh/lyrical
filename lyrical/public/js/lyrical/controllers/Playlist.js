@@ -29,7 +29,7 @@ define(['angular'], function(angular) {
                 $scope.model.title = $scope.model.title.replace(/&nbsp;/g, ' ').trim();
                 
                 PlaylistResource.update($scope.model);
-                $location.path('/playlists');
+                $location.path('/playlists/' + playlistId);
             };
         })
         .controller('PlaylistDeleteCtl', function($scope, $route, $location, PlaylistResource) {

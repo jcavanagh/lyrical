@@ -27,7 +27,7 @@ define(['angular'], function(angular) {
                 $scope.model.title = $scope.model.title.replace(/&nbsp;/g, ' ').trim();
                 
                 LyricResource.update($scope.model);
-                $location.path('/lyrics');
+                $location.path('/lyrics/' + lyricId);
             };
         })
         .controller('LyricDeleteCtl', function($scope, $route, $location, LyricResource) {
