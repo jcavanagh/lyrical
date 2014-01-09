@@ -59,20 +59,29 @@ define([
 
                     //Set app middleware
                     app.set('views', __dirname + '/views')
-                       .set('view engine', 'jade')
-                       .use(express.favicon())
-                       .use(express.logger('dev'))
-                       .use(express.bodyParser())
-                       .use(express.methodOverride())
-                       .use(app.router)
-                       .use(express.static(path.join(__dirname, 'public')))
-                       .use(express.cookieParser(Config.get('lyrical.server.cookieSecret')))
-                       .use(express.session({
-                           secret: Config.get('lyrical.server.sessionSecret')
-                       }))
-                       .use(everyauth.middleware(app));
+                        .set('view engine', 'jade')
+                        .use(express.favicon())
+                        .use(express.logger('dev'))
+                        .use(express.bodyParser())
+                        //FIXME: This is a nasty hack to deal with Sequelize and Postgres empty arrays
+                        .use(function(req, res, next) {
+                            //Strip empty arrays and replace with null
+                            for(var key in req.body) {
+                                var val = req.body[key];
+                                if(val && _.isArray(val) && !val.length) {
+                                    req.body[key] = null;
+                                }
+                            }
 
-                    everyauth.helpExpress(app);
+                            next();
+                        })
+                        .use(express.methodOverride())
+                        .use(app.router)
+                        .use(express.static(path.join(__dirname, 'public')))
+                        .use(express.cookieParser(Config.get('lyrical.server.cookieSecret')))
+                        .use(express.session({
+                            secret: Config.get('lyrical.server.sessionSecret')
+                        }));
 
                     //Set routes
                     //Controllers require models, so need to be loaded here
