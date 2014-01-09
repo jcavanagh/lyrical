@@ -12,6 +12,44 @@ define(['angular'], function(angular) {
     return angular.module('lyrical.directives').directive(
         'lyriceditor',
         function($compile, utils) {
+            /**
+             * Removes all meanings from a DOM node tree or HTML string
+             */
+            function removeAllMeanings(elementOrString) {
+                if(!elementOrString) return;
+
+                if(typeof elementOrString === 'string') {
+                    return utils.string.stripTags(elementOrString);
+                } else {
+                    //Strip meaning tags
+                    elementOrString.find('span').each(function(idx, meaning) {
+                        meaning.remove();
+                    });
+
+                    return elementOrString;
+                }
+            }
+
+            /**
+             * Removes angular ng-scope garbage from a DOM node tree
+             */
+            function cleanMeaningMarkup(element) {
+                if(!element) return;
+
+                //FIXME: Angular inserts a bunch of garbage span tags around root-level text nodes
+                //       when compiling.  Need to strip those out or everything dies.
+                element.find('span[class="ng-scope"]').each(function(idx, garbageEl) {
+                    var el = angular.element(garbageEl);
+                    el.replaceWith(el.text());
+                });
+
+                //FIXME: Apparently it does this for empty br tags too
+                element.find('br[class="ng-scope"]').each(function(idx, garbageEl) {
+                    var el = angular.element(garbageEl);
+                    el.replaceWith(document.createElement('br'));
+                });
+            }
+
             return {
                 replace: true,
                 restrict: 'E',
@@ -43,7 +81,7 @@ define(['angular'], function(angular) {
                                     end = parseInt(el.getAttribute('data-end'), 10),
                                     startLine = parseInt(el.getAttribute('data-start-line'), 10),
                                     endLine = parseInt(el.getAttribute('data-end-line'), 10),
-                                    line = el.getAttribute('data-description'),
+                                    description = el.getAttribute('data-description'),
                                     type = el.getAttribute('data-type');
 
                                 meanings.push({
@@ -62,27 +100,45 @@ define(['angular'], function(angular) {
                         return meanings;
                     }
 
-                    function cleanMeaningMarkup(html) {
-                        if(html) {
-                            //Strip non line break tags
-                            return utils.string.stripTags(html, '<br>');
-                        }
-
-                        return '';
-                    }
-
                     //Insert meanings into the editor markup
                     function insertMeaning(meaning) {
                         //Insert a meaning into the lyric view
                         var editorEl = getEditorEl();
                         if(editorEl) {
-                            var html = editorEl.html(),
-                                text = cleanMeaningMarkup(html)
+                            var html = editorEl.html();
+
+                            //Find start and end points traversing lines
+                            var startOffset = 0
+                                ,endOffset = 0
+                                ,currentLine = 0;
+
+                            for(var x in html) {
+                                var ch = html[x];
+
+                                //Found a line break!
+                                if(ch == '<' && html[x+1] == 'b' && html[x+2] == 'r') {
+                                    var width = html.indexOf('>', x) - x + 1;
+
+                                    if(currentLine < meaning.startLine) { startOffset += width; }
+                                    if(currentLine < meaning.endLine) { endOffset += width; }
+
+                                    currentLine++;
+                                } else {
+                                    //Increment start/end counters if we're not on/past their respective lines
+                                    //The final amount will be added afterward, using the stored line offset
+                                    if(currentLine < meaning.startLine) { startOffset++; }
+                                    if(currentLine < meaning.endLine) { endOffset++; }
+                                }
+                            }
+
+                            //Finalize offsets with final line offsets
+                            startOffset += meaning.start;
+                            endOffset += meaning.end;
 
                             //Snip out substrings and create highlight elements
-                            var beforeStart = html.substr(0, meaning.start),
-                                between = text.substr(meaning.start, meaning.end - meaning.start + 1),
-                                afterEnd = html.substr(meaning.end),
+                            var beforeStart = html.substr(0, startOffset),
+                                between = html.substr(startOffset, endOffset - startOffset),
+                                afterEnd = html.substr(endOffset),
                                 tagStart = '<span ' +
                                             'ng-click="meaningClick($event)" ' +
                                             'data-start="' + meaning.start + '" ' +
@@ -100,21 +156,17 @@ define(['angular'], function(angular) {
                             editorEl.html(beforeStart + tagStart + between + tagEnd + afterEnd);
                             $compile(editorEl.contents())($scope);
 
-                            //FIXME: Angular inserts a bunch of garbage span tags around root-level text nodes
-                            //       when compiling.  Need to strip those out or everything dies.
-                            editorEl.find('span[class="ng-scope"]').each(function(idx, garbageEl) {
-                                var el = angular.element(garbageEl);
-                                el.replaceWith(el.text());
-                            });
+                            cleanMeaningMarkup(editorEl);
                         } else {
                             console.error('Could not find lyric editor element!');
                         }
                     }
 
                     function insertMeanings(meanings) {
-                        //Strip existing meanings from editor
-                        var editorEl = getEditorEl()
-                        editorEl.html(cleanMeaningMarkup(editorEl.html()));
+                        //Strip existing meanings and Angular garbage from editor
+                        var editorEl = getEditorEl();
+                        editorEl.html(removeAllMeanings(editorEl));
+                        cleanMeaningMarkup(editorEl);
 
                         //Sort and insert
                         sortMeanings(meanings);
@@ -211,9 +263,9 @@ define(['angular'], function(angular) {
                             //If we have a tool
                             if(activeTool) {
                                 //Extract selected text
-                                var text = sel.toString(),
-                                    start = range.startOffset,
-                                    end = start + range.toString().length,
+                                var text = removeAllMeanings(range.cloneContents()),
+                                    start = null,
+                                    end = null,
                                     startLine = 0,
                                     endLine = 0;
 
@@ -221,26 +273,34 @@ define(['angular'], function(angular) {
                                 //If it does, that means we intersect another meaning, which is not allowed
                                 var nodes = range.cloneContents();
 
-                                var intersects = false;
+                                var intersects = false
+                                    ,lineLength = 0;
+
                                 if(nodes) {
                                     for(var x = 0; x < nodes.childNodes.length; x++) {
                                         var node = nodes.childNodes[x];
                                         if(node) {
-                                            var isLineBreak = node.nodeName.toLowerCase() == "br";
+                                            var isLineBreak = node.nodeName.toLowerCase() == 'br',
+                                                isTextNode = node instanceof Text;
 
                                             //Check for text node or line break
-                                            if(!(node instanceof Text) && !isLineBreak) {
+                                            if(!isTextNode && !isLineBreak) {
                                                 intersects = true;
                                                 break;
+                                            } else if(!isLineBreak) {
+                                                lineLength += node.text().length;
                                             }
 
                                             //If if is a line break, increment the endLine counter
                                             if(isLineBreak) {
                                                 endLine++;
+                                                lineLength = 0;
                                             }
                                         }
                                     }
                                 }
+
+                                //Finalize end offset
 
                                 if(intersects) {
                                     $scope.alerts[0] = {
@@ -254,14 +314,14 @@ define(['angular'], function(angular) {
                                     return;
                                 }
 
-                                //Find all preceding text nodes and offset the start/end by their combined lengths
+                                //Find all preceding nodes and offset the start/end by their combined lengths
                                 var currentNode = range.startContainer
                                     ,offset = 0;
 
                                 while(currentNode && currentNode.previousSibling)  {
                                     var sibling = currentNode.previousSibling,
-                                        isText = sibling instanceof Text
-                                        isLineBreak = sibling.nodeName.toLowerCase() == "br";
+                                        isText = sibling instanceof Text,
+                                        isLineBreak = sibling.nodeName.toLowerCase() == 'br';
                                     
                                     if(isText) {
                                         offset += sibling.data.length;
