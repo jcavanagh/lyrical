@@ -51,15 +51,21 @@ define(['angular'], function(angular) {
             }
 
             return {
-                replace: true,
                 restrict: 'E',
+                require: '?ngModel',
                 templateUrl: '/directives/_lyric_editor.html',
-                link: function($scope, $element, attrs) {
+                link: function($scope, $element, attrs, ngModel) {
+                    if(!ngModel) {
+                        console.warn('LyricEditor not bound to model!');
+                        return;
+                    }
+
                     function getEditorEl() {
                         return $element.find('.lyriceditor');
                     }
 
                     function sortMeanings(meanings) {
+                        //Sort meanings ascending by start
                         meanings.sort(function(a, b) {
                             if(a.start < b.start) { return -1; }
                             if(a.start > b.start) { return 1; }
@@ -79,16 +85,12 @@ define(['angular'], function(angular) {
                                 var el = children[x],
                                     start = parseInt(el.getAttribute('data-start'), 10),
                                     end = parseInt(el.getAttribute('data-end'), 10),
-                                    startLine = parseInt(el.getAttribute('data-start-line'), 10),
-                                    endLine = parseInt(el.getAttribute('data-end-line'), 10),
                                     description = el.getAttribute('data-description'),
                                     type = el.getAttribute('data-type');
 
                                 meanings.push({
                                     start: start,
                                     end: end,
-                                    startLine: startLine,
-                                    endLine: endLine,
                                     description: description,
                                     type: type
                                 });
@@ -100,89 +102,96 @@ define(['angular'], function(angular) {
                         return meanings;
                     }
 
-                    //Insert meanings into the editor markup
-                    function insertMeaning(meaning) {
-                        //Insert a meaning into the lyric view
+                    function insertMeanings(meanings) {
+                        //Sort!
+                        sortMeanings(meanings);
+
+                        //Insert meanings into the lyric view
                         var editorEl = getEditorEl();
                         if(editorEl) {
-                            var html = editorEl.html();
+                            var node = angular.element(editorEl.contents()[0])
+                                ,lyricOffset = 0
+                                ,currentMeaning = 0
+                                ,meaning = meanings[currentMeaning];
 
-                            //Find start and end points traversing lines
-                            var startOffset = 0
-                                ,endOffset = 0
-                                ,currentLine = 0;
+                            debugger;
+                            while(node && currentMeaning <= meanings.length) {
+                                //If it's a text node
+                                if(node.context.nodeType === 3) {
+                                    //We might find our start/end point here
+                                    for(var y = 0; y < node.text().length; y++) {
+                                        //Found the start!
+                                        if(lyricOffset == meaning.start) {
+                                            debugger;
+                                            //Create the start node
+                                            var meaningNode = angular.element('<span ' +
+                                                            'ng-click="meaningClick($event)" ' +
+                                                            'data-start="' + meaning.start + '" ' +
+                                                            'data-end="' + meaning.end + '" ' +
+                                                            'data-type="' + meaning.type + '" ' +
+                                                            'data-description="' + meaning.description + '" ' +
+                                                            'class="meaning ' + meaning.type + '"' +
+                                                            '></span>');
 
-                            for(var x in html) {
-                                var ch = html[x];
+                                            //Split the current text node and append the new things
+                                            var meaningLength = meaning.end - meaning.start
+                                                ,leftNode = document.createTextNode(node.text().substr(0, y))
+                                                ,rightNode = document.createTextNode(node.text().substr(y + meaningLength));
 
-                                //Found a line break!
-                                if(ch == '<' && html[x+1] == 'b' && html[x+2] == 'r') {
-                                    var width = html.indexOf('>', x) - x + 1;
+                                            meaningNode.text(node.text().substr(y, meaningLength));
 
-                                    if(currentLine < meaning.startLine) { startOffset += width; }
-                                    if(currentLine < meaning.endLine) { endOffset += width; }
+                                            //Replace the current text node
+                                            node.replaceWith([ leftNode, meaningNode, rightNode ]);
 
-                                    currentLine++;
+                                            //Adjust the next node and lyric text offset to continue the search
+                                            node = angular.element(rightNode);
+                                            y = meaning.end;
+
+                                            //Move to the next meaning
+                                            currentMeaning++;
+
+                                            //Check to see if we're done
+                                            if(currentMeaning >= meanings.length) break;
+
+                                            //Otherwise carry on
+                                            meaning = meanings[currentMeaning];
+                                        }
+
+                                        //Carry on...
+                                        lyricOffset++;
+                                    }
                                 } else {
-                                    //Increment start/end counters if we're not on/past their respective lines
-                                    //The final amount will be added afterward, using the stored line offset
-                                    if(currentLine < meaning.startLine) { startOffset++; }
-                                    if(currentLine < meaning.endLine) { endOffset++; }
+                                    //A Meaning
+                                    lyricOffset += node.attr('data-end') - node.attr('data-start');
+
+                                    //NEXT!
+                                    node = node.next();
                                 }
                             }
 
-                            //Finalize offsets with final line offsets
-                            startOffset += meaning.start;
-                            endOffset += meaning.end;
-
-                            //Snip out substrings and create highlight elements
-                            var beforeStart = html.substr(0, startOffset),
-                                between = html.substr(startOffset, endOffset - startOffset),
-                                afterEnd = html.substr(endOffset),
-                                tagStart = '<span ' +
-                                            'ng-click="meaningClick($event)" ' +
-                                            'data-start="' + meaning.start + '" ' +
-                                            'data-end="' + meaning.end + '" ' +
-                                            'data-start-line="' + meaning.startLine + '" ' +
-                                            'data-end-line="' + meaning.endLine + '" ' +
-                                            'data-type="' + meaning.type + '" ' +
-                                            'data-description="' + meaning.description + '" ' +
-                                            'class="meaning ' + meaning.type + '"' +
-                                            '>',
-                                tagEnd = '</span>';
-
-                            //Re-append all the things
-                            editorEl.contents().remove();
-                            editorEl.html(beforeStart + tagStart + between + tagEnd + afterEnd);
+                            //Recompile angular directives
                             $compile(editorEl.contents())($scope);
 
-                            cleanMeaningMarkup(editorEl);
+                            // cleanMeaningMarkup(editorEl);
                         } else {
                             console.error('Could not find lyric editor element!');
                         }
                     }
 
-                    function insertMeanings(meanings) {
-                        //Strip existing meanings and Angular garbage from editor
-                        var editorEl = getEditorEl();
-                        editorEl.html(removeAllMeanings(editorEl));
-                        cleanMeaningMarkup(editorEl);
+                    //Fill element content when the model is updated
+                    var oldRender = ngModel.$render;
 
-                        //Sort and insert
-                        sortMeanings(meanings);
-
-                        if(meanings) {
-                            //Must be reverse inserted or all the text parsing is hosed
-                            //Stupid contenteditables
-                            for(var x = meanings.length - 1; x >= 0; x--) {
-                                insertMeaning(meanings[x]);
-                            }
+                    ngModel.$render = function() {
+                        if ( !!oldRender) {
+                            oldRender();
                         }
-                    }
+
+                        getEditorEl().html(ngModel.$viewValue || '');
+                    };
 
                     //Watch for meaning changes
                     $scope.$watchCollection('model.meanings', function(meanings) {
-                        if(meanings) {
+                        if(meanings && meanings.length) {
                             insertMeanings(meanings);
                         } else {
                             console.log('Not inserting null meanings');
@@ -243,7 +252,6 @@ define(['angular'], function(angular) {
                     }
 
                     //Scope things
-                    $scope.activeTool = null;
                     $scope.alerts = [];
 
                     $scope.closeAlert = function(index) {
@@ -351,8 +359,6 @@ define(['angular'], function(angular) {
                                     $modalScope.model.type = activeTool;
                                     $modalScope.model.start = start;
                                     $modalScope.model.end = end;
-                                    $modalScope.model.startLine = startLine;
-                                    $modalScope.model.endLine = endLine;
                                     $modalScope.model.LyricId = $scope.model.id;
 
                                     $modalScope.onSubmit = function() {
@@ -446,8 +452,6 @@ define(['angular'], function(angular) {
                                     type: eventEl.attr('data-type')
                                     ,start: eventEl.attr('data-start')
                                     ,end: eventEl.attr('data-end')
-                                    ,startLine: eventEl.attr('data-start-line')
-                                    ,endLine: eventEl.attr('data-end-line')
                                     ,description: eventEl.attr('data-description')
                                 };
 
@@ -457,8 +461,6 @@ define(['angular'], function(angular) {
                             $modalScope.model.type = oldMeaning.type;
                             $modalScope.model.start = oldMeaning.start;
                             $modalScope.model.end = oldMeaning.end;
-                            $modalScope.model.startLine = oldMeaning.startLine;
-                            $modalScope.model.endLine = oldMeaning.endLine;
                             $modalScope.model.description = oldMeaning.description;
 
                             $modalScope.toolClick = function(type) {

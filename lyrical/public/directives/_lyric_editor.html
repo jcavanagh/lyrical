@@ -1,54 +1,14 @@
 <div>
-    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
-    <div class="button-group">
-        <button type="button" class="lyric-super-important glyphicon glyphicon-pencil"
-            ng-class="{'lyric-tool-selected': activeTool == 'lyric-super-important'}"
-            popover="Super important"
-            popover-placement="top"
-            popover-trigger="mouseenter"
-            ng-click="toolClick('lyric-super-important')"
-        ></button>
-        <button type="button" class="lyric-important glyphicon glyphicon-pencil"
-        ng-class="{'lyric-tool-selected': activeTool == 'lyric-important'}"
-            popover="Important"
-            popover-placement="top"
-            popover-trigger="mouseenter"
-            ng-click="toolClick('lyric-important')"
-        ></button>
-        <button type="button" class="lyric-neutral glyphicon glyphicon-pencil"
-            ng-class="{'lyric-tool-selected': activeTool == 'lyric-neutral'}"
-            popover="Neutral"
-            popover-placement="top"
-            popover-trigger="mouseenter"
-            ng-click="toolClick('lyric-neutral')"
-        ></button>
-        <button type="button" class="lyric-unimportant glyphicon glyphicon-pencil"
-            ng-class="{'lyric-tool-selected': activeTool == 'lyric-unimportant'}"
-            popover="Unimportant"
-            popover-placement="top"
-            popover-trigger="mouseenter"
-            ng-click="toolClick('lyric-unimportant')"
-        ></button>
-        <button type="button" class="lyric-irrelevant glyphicon glyphicon-pencil"
-            ng-class="{'lyric-tool-selected': activeTool == 'lyric-irrelevant'}"
-            popover="Irrelevant"
-            popover-placement="top"
-            popover-trigger="mouseenter"
-            ng-click="toolClick('lyric-irrelevant')"
-        ></button>
-        <span class="glyphicon glyphicon-question-sign" 
-            popover="Click a tool, then select text in the lyrics box.  Then, you can annotate the text with what it means to you!" 
-            popover-placement="right" 
-            popover-trigger="mouseenter"
-        ></span>
+    <div class="alert alert-info">
+        <strong>Annotate things!</strong>
+        Select any text to annotate it with what it means to you!
     </div>
+    <alert ng-repeat="alert in alerts" type="alert.type" close="closeAlert($index)">{{alert.msg}}</alert>
     <div 
-        style="height:auto" class="form-control lyriceditor"
+        style="height:auto; white-space: pre;" class="form-control lyriceditor"
         ng-mousedown="editorMousedown()"
         ng-mouseup="editorMouseup()"
         ng-mouseenter="editorMouseenter()"
-        ng-mouseleave="editorMouseleave()"
-        ng-model="model.text"
-        contenteditable strip-on-paste="true" retain-space="false">
+        ng-mouseleave="editorMouseleave()">
     </div>
 </div>

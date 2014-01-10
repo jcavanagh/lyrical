@@ -21,7 +21,7 @@ define([], function() {
                 restrict: 'A',
                 require: '?ngModel',
                 link: function($scope, $element, attrs, ngModel) {
-                    // don't do anything unless this is actually bound to a model
+                    // Don't do anything unless this is actually bound to a model
                     if (!ngModel) {
                         return;
                     }
