@@ -115,7 +115,7 @@ define(['angular'], function(angular) {
                                 ,meaning = meanings[currentMeaning];
 
                             debugger;
-                            while(node && currentMeaning <= meanings.length) {
+                            while(node && currentMeaning < meanings.length) {
                                 //If it's a text node
                                 if(node.context.nodeType === 3) {
                                     //We might find our start/end point here
