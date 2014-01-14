@@ -23,8 +23,20 @@ define(['angular'], function(angular) {
                 } else {
                     //Strip meaning tags
                     elementOrString.find('span').each(function(idx, meaning) {
-                        meaning.remove();
+                        var el = angular.element(meaning);
+                        el.replaceWith(el.text());
                     });
+
+                    //Merge all text nodes in the original element
+                    var node = elementOrString[0].childNodes[0],
+                        text = '';
+
+                    do {
+                        text += angular.element(node).text();
+                        node = node.nextSibling;
+                    } while (node);
+
+                    angular.element(elementOrString).text(text);
 
                     return elementOrString;
                 }
@@ -36,7 +48,7 @@ define(['angular'], function(angular) {
             function cleanMeaningMarkup(element) {
                 if(!element) return;
 
-                //FIXME: Angular inserts a bunch of garbage span tags around root-level text nodes
+                //FIXME: Angular inserts a bunch of garbage span tags around text nodes
                 //       when compiling.  Need to strip those out or everything dies.
                 element.find('span[class="ng-scope"]').each(function(idx, garbageEl) {
                     var el = angular.element(garbageEl);
@@ -48,6 +60,10 @@ define(['angular'], function(angular) {
                     var el = angular.element(garbageEl);
                     el.replaceWith(document.createElement('br'));
                 });
+            }
+
+            function isEditorEl(element) {
+                return element && element.hasClass && element.hasClass('lyriceditor');
             }
 
             return {
@@ -103,12 +119,22 @@ define(['angular'], function(angular) {
                     }
 
                     function insertMeanings(meanings) {
+                        //Returns the next sibling for an jQuery node, respecting text nodes as real things
+                        function getNextSibling(node) {
+                            var sibling = node[0].nextSibling;
+
+                            return sibling ? angular.element(sibling) : null;
+                        }
+
                         //Sort!
                         sortMeanings(meanings);
 
                         //Insert meanings into the lyric view
                         var editorEl = getEditorEl();
                         if(editorEl) {
+                            //Nuke existing entries
+                            removeAllMeanings(editorEl);
+
                             var node = angular.element(editorEl.contents()[0])
                                 ,lyricOffset = 0
                                 ,currentMeaning = 0
@@ -118,61 +144,71 @@ define(['angular'], function(angular) {
                             while(node && currentMeaning < meanings.length) {
                                 //If it's a text node
                                 if(node.context.nodeType === 3) {
-                                    //We might find our start/end point here
-                                    for(var y = 0; y < node.text().length; y++) {
-                                        //Found the start!
-                                        if(lyricOffset == meaning.start) {
-                                            debugger;
-                                            //Create the start node
-                                            var meaningNode = angular.element('<span ' +
-                                                            'ng-click="meaningClick($event)" ' +
-                                                            'data-start="' + meaning.start + '" ' +
-                                                            'data-end="' + meaning.end + '" ' +
-                                                            'data-type="' + meaning.type + '" ' +
-                                                            'data-description="' + meaning.description + '" ' +
-                                                            'class="meaning ' + meaning.type + '"' +
-                                                            '></span>');
+                                    if(node.text().length) {
+                                        //We might find our start/end point here
+                                        for(var y = 0; y < node.text().length; y++) {
+                                            //Found the start!
+                                            if(lyricOffset == meaning.start) {
+                                                debugger;
+                                                //Create the start node
+                                                var meaningNode = angular.element('<span ' +
+                                                                'ng-click="meaningClick($event)" ' +
+                                                                'data-start="' + meaning.start + '" ' +
+                                                                'data-end="' + meaning.end + '" ' +
+                                                                'data-type="' + meaning.type + '" ' +
+                                                                'data-description="' + meaning.description + '" ' +
+                                                                'class="meaning ' + meaning.type + '"' +
+                                                                '></span>');
 
-                                            //Split the current text node and append the new things
-                                            var meaningLength = meaning.end - meaning.start
-                                                ,leftNode = document.createTextNode(node.text().substr(0, y))
-                                                ,rightNode = document.createTextNode(node.text().substr(y + meaningLength));
+                                                //Split the current text node and append the new things
+                                                var meaningLength = meaning.end - meaning.start
+                                                    ,leftNode = document.createTextNode(node.text().substr(0, y))
+                                                    ,rightNode = document.createTextNode(node.text().substr(y + meaningLength));
 
-                                            meaningNode.text(node.text().substr(y, meaningLength));
+                                                meaningNode.text(node.text().substr(y, meaningLength));
 
-                                            //Replace the current text node
-                                            node.replaceWith([ leftNode, meaningNode, rightNode ]);
+                                                //Replace the current text node
+                                                node.replaceWith([ leftNode, meaningNode, rightNode ]);
 
-                                            //Adjust the next node and lyric text offset to continue the search
-                                            node = angular.element(rightNode);
-                                            y = meaning.end;
+                                                //Adjust the next node and lyric text offset to continue the search
+                                                node = angular.element(rightNode);
+                                                lyricOffset += meaningLength;
 
-                                            //Move to the next meaning
-                                            currentMeaning++;
+                                                //Move to the next meaning
+                                                currentMeaning++;
 
-                                            //Check to see if we're done
-                                            if(currentMeaning >= meanings.length) break;
+                                                if(currentMeaning < meanings.length) {
+                                                    meaning = meanings[currentMeaning];
+                                                }
 
-                                            //Otherwise carry on
-                                            meaning = meanings[currentMeaning];
+                                                //We've changed the node - break out and begin from the top
+                                                break;
+                                            } else if(y === node.text().length - 1) {
+                                                //If this is the last character, and we don't have a lyric start, then go to the next node
+                                                debugger;
+                                                node = getNextSibling(node);
+                                            }
+
+                                            //Carry on...
+                                            lyricOffset++;
                                         }
-
-                                        //Carry on...
-                                        lyricOffset++;
+                                    } else {
+                                        //Blank text node, skip it
+                                        debugger;
+                                        node = getNextSibling(node);
                                     }
                                 } else {
                                     //A Meaning
                                     lyricOffset += node.attr('data-end') - node.attr('data-start');
 
                                     //NEXT!
-                                    node = node.next();
+                                    node = getNextSibling(node);
                                 }
                             }
 
                             //Recompile angular directives
                             $compile(editorEl.contents())($scope);
-
-                            // cleanMeaningMarkup(editorEl);
+                            cleanMeaningMarkup(editorEl);
                         } else {
                             console.error('Could not find lyric editor element!');
                         }
@@ -199,24 +235,9 @@ define(['angular'], function(angular) {
                     });
                 },
                 controller: function($scope, $modal, $element) {
-                    //Tool/mouse state
-                    var toolDragging = false
-                        ,mouseContained = false
-                        ,mouseContainTimeout = 1000
-                        ,mouseContainTimeoutId = null;
-
                     //Helpers
                     function resetDrag() {
-                        toolDragging = false;
                         window.getSelection().removeAllRanges();
-                    }
-
-                    function dragStart() {
-                        toolDragging = true;
-                    }
-
-                    function dragEnd() {
-                        toolDragging = false;
                     }
 
                     function showCreateMeaningModal(controller) {
@@ -264,142 +285,89 @@ define(['angular'], function(angular) {
                         var sel = window.getSelection(),
                             range = sel.getRangeAt(0);
 
-                        //Make sure there's a selection
-                        if(!range.collapsed) {
-                            var activeTool = $scope.activeTool;
+                        //TODO: Make sure the selection starts and ends in the editor
+                        var isEditorSelection = true;
 
-                            //If we have a tool
-                            if(activeTool) {
-                                //Extract selected text
-                                var text = removeAllMeanings(range.cloneContents()),
-                                    start = null,
-                                    end = null,
-                                    startLine = 0,
-                                    endLine = 0;
+                        //Make sure there's a selection and that it starts and ends in the editor
+                        if(!range.collapsed && isEditorSelection) {
+                            //Extract selected text
+                            var start = 0,
+                                end = 0;
 
-                                //Test to see if the range intersects any nodes that aren't text or line breaks
-                                //If it does, that means we intersect another meaning, which is not allowed
-                                var nodes = range.cloneContents();
+                            //Find all preceding nodes and offset the start/end by their combined lengths
+                            //Don't wrap it, since jQuery is really bad at text nodes
+                            var currentNode = range.startContainer
+                                ,offset = 0;
 
-                                var intersects = false
-                                    ,lineLength = 0;
+                            while(currentNode)  {
+                                var sibling = currentNode.previousSibling;
+                                
+                                //Increment the offset
+                                offset += angular.element(sibling).text().length;
 
-                                if(nodes) {
-                                    for(var x = 0; x < nodes.childNodes.length; x++) {
-                                        var node = nodes.childNodes[x];
-                                        if(node) {
-                                            var isLineBreak = node.nodeName.toLowerCase() == 'br',
-                                                isTextNode = node instanceof Text;
+                                //Climb up the chain
+                                currentNode = sibling;
+                            }
 
-                                            //Check for text node or line break
-                                            if(!isTextNode && !isLineBreak) {
-                                                intersects = true;
-                                                break;
-                                            } else if(!isLineBreak) {
-                                                lineLength += node.text().length;
-                                            }
+                            start += offset + range.startOffset;
+                            end += start + range.toString().length;
 
-                                            //If if is a line break, increment the endLine counter
-                                            if(isLineBreak) {
-                                                endLine++;
-                                                lineLength = 0;
-                                            }
-                                        }
-                                    }
-                                }
+                            //Test for intersection with other meanings
+                            // if(intersectsMeaning(start, end)) {
+                            //     $scope.alerts[0] = {
+                            //         type: 'danger'
+                            //         ,msg: 'Meanings cannot overlap!'
+                            //     };
 
-                                //Finalize end offset
+                            //     //Clear selections
+                            //     window.getSelection().removeAllRanges();
 
-                                if(intersects) {
-                                    $scope.alerts[0] = {
-                                        type: 'danger'
-                                        ,msg: 'Meanings cannot overlap!'
-                                    };
+                            //     return;
+                            // }
 
-                                    //Clear selections
+                            //Create a modal to create the meaning
+                            var modal = showCreateMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
+                                //This is for display reference only - not saved with the meaning
+                                $modalScope.meaningText = range.toString();
+
+                                //Set all the things we already know on the modal's model
+                                $modalScope.model = $modalScope.model || {};
+                                $modalScope.model.start = start;
+                                $modalScope.model.end = end;
+                                $modalScope.model.LyricId = $scope.model.id;
+
+                                $modalScope.onSubmit = function() {
                                     window.getSelection().removeAllRanges();
 
-                                    return;
-                                }
-
-                                //Find all preceding nodes and offset the start/end by their combined lengths
-                                var currentNode = range.startContainer
-                                    ,offset = 0;
-
-                                while(currentNode && currentNode.previousSibling)  {
-                                    var sibling = currentNode.previousSibling,
-                                        isText = sibling instanceof Text,
-                                        isLineBreak = sibling.nodeName.toLowerCase() == 'br';
-                                    
-                                    if(isText) {
-                                        offset += sibling.data.length;
-                                    } else if (isLineBreak) {
-                                        //Increment the start line counter
-                                        startLine++;
+                                    //Stash and render the Meaning
+                                    var newMeaning = angular.copy($modalScope.model);
+                                    if(!$scope.model.meanings) {
+                                        $scope.model.meanings = [ newMeaning ];
                                     } else {
-                                        offset += sibling.innerHTML.length;
+                                        $scope.model.meanings.push(newMeaning);
                                     }
 
-                                    currentNode = sibling;
-                                }
-
-                                start += offset;
-                                end += offset;
-
-                                //Add the startLine to the endLine, since the endLine is done before and does not include preceding nodes
-                                endLine += startLine;
-
-                                //Create a modal to create the meaning
-                                var modal = showCreateMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
-                                    //This is for display reference only - not saved with the meaning
-                                    $modalScope.meaningText = text;
-
-                                    //Set all the things we already know on the modal's model
-                                    $modalScope.model = $modalScope.model || {};
-                                    $modalScope.model.type = activeTool;
-                                    $modalScope.model.start = start;
-                                    $modalScope.model.end = end;
-                                    $modalScope.model.LyricId = $scope.model.id;
-
-                                    $modalScope.onSubmit = function() {
-                                        window.getSelection().removeAllRanges();
-
-                                        //Stash and render the Meaning
-                                        var newMeaning = angular.copy($modalScope.model);
-                                        if(!$scope.model.meanings) {
-                                            $scope.model.meanings = [ newMeaning ];
-                                        } else {
-                                            $scope.model.meanings.push(newMeaning);
-                                        }
-
-                                        try {
-                                            //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                            //       but seems benign
-                                            $modalInstance.dismiss();
-                                        } catch(e) {
-                                            //Do nothing
-                                        }
-                                    };
-
-                                    $modalScope.onCancel = function() {
-                                        window.getSelection().removeAllRanges();
-                                        
-                                        try {
-                                            //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                            //       but seems benign
-                                            $modalInstance.dismiss();
-                                        } catch(e) {
-                                            //Do nothing
-                                        }
-                                    };
-                                }]);
-                            } else {
-                                //Choose a tool, fool!
-                                $scope.alerts[0] = {
-                                    type: 'danger'
-                                    ,msg: 'Please select a tool before annotating text!'
+                                    try {
+                                        //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                        //       but seems benign
+                                        $modalInstance.dismiss();
+                                    } catch(e) {
+                                        //Do nothing
+                                    }
                                 };
-                            }
+
+                                $modalScope.onCancel = function() {
+                                    window.getSelection().removeAllRanges();
+                                    
+                                    try {
+                                        //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                        //       but seems benign
+                                        $modalInstance.dismiss();
+                                    } catch(e) {
+                                        //Do nothing
+                                    }
+                                };
+                            }]);
                         }
                     }
 
@@ -408,41 +376,9 @@ define(['angular'], function(angular) {
                         console.log('paste!', arguments);
                     });
 
-                    $scope.toolClick = function(toolCls) {
-                        $scope.activeTool = toolCls;
-                        resetDrag();
-                    };
-
                     //Mouse tracking
-                    $scope.editorMousedown = function() {
-                        dragStart();
-                    };
-
                     $scope.editorMouseup = function() {
-                        dragEnd();
-
                         onTextSelected();
-                    };
-
-                    $scope.editorMouseenter = function() {
-                        mouseContained = true;
-
-                        if(mouseContainTimeoutId) {
-                            clearTimeout(mouseContainTimeoutId);
-                        }
-                    };
-
-                    $scope.editorMouseleave = function() {
-                        mouseContained = false;
-
-                        //If the mouse leaves, we can't detect mouseup
-                        //Time out and pop up the editor window anyway
-                        if(toolDragging) {
-                            mouseContainTimeoutId = setTimeout(function() {
-                                dragEnd();
-                                onTextSelected();
-                            }, mouseContainTimeout);
-                        }
                     };
 
                     $scope.meaningClick = function($event) {
