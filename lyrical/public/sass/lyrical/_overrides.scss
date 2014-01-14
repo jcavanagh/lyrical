@@ -1,0 +1,8 @@
+//These two disable the hard scrollbar on modals, and realign the body correctly
+.modal {
+    overflow-y: auto !important;
+}
+
+body.modal-open {
+    margin-right: 0px !important;
+}

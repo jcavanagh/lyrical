@@ -57,6 +57,14 @@ body {
   -ms-user-select: none;
   user-select: none; }
 
+/* line 2, ../sass/lyrical/_overrides.scss */
+.modal {
+  overflow-y: auto !important; }
+
+/* line 6, ../sass/lyrical/_overrides.scss */
+body.modal-open {
+  margin-right: 0px !important; }
+
 /* line 1, ../sass/lyrical/_playlist.scss */
 .youtube-logo {
   height: 32px;
