@@ -381,9 +381,17 @@ define(['angular'], function(angular) {
                     });
 
                     //Mouse tracking
+                    $scope.editorDrag = false;
                     $scope.editorMouseup = function() {
-                        onTextSelected();
+                        if($scope.editorDrag) {
+                            onTextSelected();
+                            $scope.editorDrag = false;
+                        }
                     };
+
+                    $scope.editorMousedown = function() {
+                        $scope.editorDrag = true;
+                    }
 
                     $scope.meaningClick = function($event) {
                         var modal = showEditMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
