@@ -240,17 +240,9 @@ define(['angular'], function(angular) {
                         window.getSelection().removeAllRanges();
                     }
 
-                    function showCreateMeaningModal(controller) {
+                    function showMeaningModal(controller) {
                         return $modal.open({
-                            templateUrl: '/views/meaning/_meaning_create.html'
-                            ,backdrop: false
-                            ,controller: controller
-                        });
-                    }
-
-                    function showEditMeaningModal(controller) {
-                        return $modal.open({
-                            templateUrl: '/views/meaning/_meaning_update.html'
+                            templateUrl: '/views/meaning/_meaning_modal.html'
                             ,backdrop: false
                             ,controller: controller
                         });
@@ -326,7 +318,7 @@ define(['angular'], function(angular) {
                             // }
 
                             //Create a modal to create the meaning
-                            var modal = showCreateMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
+                            var modal = showMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
                                 //This is for display reference only - not saved with the meaning
                                 $modalScope.meaningText = range.toString().replace(/^[\r\n]+|\.|[\r\n]+$/g, "").trim();
 
@@ -394,7 +386,7 @@ define(['angular'], function(angular) {
                     }
 
                     $scope.meaningClick = function($event) {
-                        var modal = showEditMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
+                        var modal = showMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
                             var eventEl = angular.element($event.currentTarget)
                                 ,oldMeaning = {
                                     type: eventEl.attr('data-type')
@@ -402,6 +394,9 @@ define(['angular'], function(angular) {
                                     ,end: eventEl.attr('data-end')
                                     ,description: eventEl.attr('data-description')
                                 };
+
+                            //Flag as editing
+                            $modalScope.editingMeaning = true;
 
                             //Stash existing data on the editing model
                             $modalScope.meaningText = eventEl.text().trim();
@@ -477,6 +472,10 @@ define(['angular'], function(angular) {
                                     console.error('Could not remove old meaning when deleting!');
                                 }
                             };
+
+                            $modalScope.typeClicked = function(element) {
+                                $modalScope.model.type = element.target.value;
+                            }
                         }]);
                     };
                 }

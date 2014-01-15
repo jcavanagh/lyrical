@@ -1,6 +1,14 @@
 <div>
     <div class="modal-header">
-        <h3>Create a Meaning</h3>
+        <h3 ng-hide="editingMeaning">Create a Meaning</h3>
+        <h3 ng-show="editingMeaning">
+            Editing Meaning
+            <div class="button-group pull-right" style="display:inline-block">
+                <a ng-click="delete()" class="btn btn-danger">
+                    <span class="glyphicon glyphicon-trash"></span> Delete
+                </a>
+            </div>
+        </h3>
     </div>
     <div class="modal-body">
         <form class="form-horizontal" role="form">
@@ -15,29 +23,29 @@
                 <div class="container">
                     <div class="btn-group">
                         <button
-                            type="button" class="btn btn-success"
+                            type="button" class="btn"
                             ng-click="typeClicked($event)"
-                            ng-class="{ active: model.type == lyric-super-important }"
+                            ng-class="{ 'btn-success': model.type == 'lyric-super-important' }"
                             value="lyric-super-important">Super</button>
                         <button
-                            type="button" class="btn btn-primary"
+                            type="button" class="btn"
                             ng-click="typeClicked($event)"
-                            ng-class="{ active: model.type == lyric-important }"
+                            ng-class="{ 'btn-primary': model.type == 'lyric-important' }"
                             value="lyric-important">Really</button>
                         <button
-                            type="button" class="btn btn-info"
+                            type="button" class="btn"
                             ng-click="typeClicked($event)"
-                            ng-class="{ active: model.type == lyric-neutral }"
+                            ng-class="{ 'btn-info': model.type == 'lyric-neutral' }"
                             value="lyric-neutral">Kinda</button>
                         <button
-                            type="button" class="btn btn-warning"
+                            type="button" class="btn"
                             ng-click="typeClicked($event)"
-                            ng-class="{ active: model.type == lyric-unimportant }"
+                            ng-class="{ 'btn-warning': model.type == 'lyric-unimportant' }"
                             value="lyric-unimportant">Not really</button>
                         <button
-                            type="button" class="btn btn-danger"
+                            type="button" class="btn"
                             ng-click="typeClicked($event)"
-                            ng-class="{ active: model.type == lyric-irrelevant }"
+                            ng-class="{ 'btn-danger': model.type == 'lyric-irrelevant' }"
                             value="lyric-irrelevant">Not at all</button>
                     </div>
                 </div>
