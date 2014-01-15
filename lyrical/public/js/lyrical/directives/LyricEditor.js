@@ -264,6 +264,31 @@ define(['angular'], function(angular) {
                         return -1;
                     }
 
+                    function intersectsMeaning(start, end) {
+                        var intersects = false;
+                        angular.forEach($scope.model.meanings, function(meaning) {
+                            //Start intersects
+                            if(meaning.start <= start && meaning.end >= start) {
+                                console.debug('Meaning start intersects:', start, end, meaning);
+                                intersects = true;
+                            }
+
+                            //End intersects
+                            if(meaning.start <= end && meaning.end >= end) {
+                                console.debug('Meaning end intersects:', start, end, meaning);
+                                intersects = true;
+                            }
+
+                            //Meaning fully contained
+                            if(meaning.start >= start && meaning.end <= end) {
+                                console.debug('Meaning contained:', start, end, meaning);
+                                intersects = true;
+                            }
+                        });
+
+                        return intersects;
+                    }
+
                     //Scope things
                     $scope.alerts = [];
 
@@ -283,13 +308,20 @@ define(['angular'], function(angular) {
                         //Make sure there's a selection and that it starts and ends in the editor
                         if(!range.collapsed && isEditorSelection) {
                             //Extract selected text
-                            var start = 0,
+                            var start = range.startOffset,
                                 end = 0;
 
                             //Find all preceding nodes and offset the start/end by their combined lengths
                             //Don't wrap it, since jQuery is really bad at text nodes
                             var currentNode = range.startContainer
                                 ,offset = 0;
+
+                            //If we started our click in a meaning element, we need to manually account for that
+                            //since it's down a level in the DOM tree and siblings become wrong
+                            var tmpEl = angular.element(currentNode);
+                            if(tmpEl.parent().hasClass('meaning')) {
+                                currentNode = tmpEl.parent()[0];
+                            }
 
                             while(currentNode)  {
                                 var sibling = currentNode.previousSibling;
@@ -301,21 +333,21 @@ define(['angular'], function(angular) {
                                 currentNode = sibling;
                             }
 
-                            start += offset + range.startOffset;
+                            start += offset;
                             end += start + range.toString().length;
 
                             //Test for intersection with other meanings
-                            // if(intersectsMeaning(start, end)) {
-                            //     $scope.alerts[0] = {
-                            //         type: 'danger'
-                            //         ,msg: 'Meanings cannot overlap!'
-                            //     };
+                            if(intersectsMeaning(start, end)) {
+                                $scope.alerts[0] = {
+                                    type: 'danger'
+                                    ,msg: 'Meanings cannot overlap!'
+                                };
 
-                            //     //Clear selections
-                            //     window.getSelection().removeAllRanges();
+                                //Clear selections
+                                window.getSelection().removeAllRanges();
 
-                            //     return;
-                            // }
+                                return;
+                            }
 
                             //Create a modal to create the meaning
                             var modal = showMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
