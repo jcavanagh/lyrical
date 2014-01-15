@@ -268,13 +268,13 @@ define(['angular'], function(angular) {
                         var intersects = false;
                         angular.forEach($scope.model.meanings, function(meaning) {
                             //Start intersects
-                            if(meaning.start <= start && meaning.end >= start) {
+                            if(meaning.start <= start && meaning.end > start) {
                                 console.debug('Meaning start intersects:', start, end, meaning);
                                 intersects = true;
                             }
 
                             //End intersects
-                            if(meaning.start <= end && meaning.end >= end) {
+                            if(meaning.start < end && meaning.end >= end) {
                                 console.debug('Meaning end intersects:', start, end, meaning);
                                 intersects = true;
                             }
