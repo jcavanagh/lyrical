@@ -240,11 +240,102 @@ define(['angular'], function(angular) {
                         window.getSelection().removeAllRanges();
                     }
 
-                    function showMeaningModal(controller) {
+                    /**
+                     * Shows a meaning modal for editing or creations
+                     *
+                     * @param {Object} meaningData May contain the following properties:
+                     * - start {Number} Meaning start (required)
+                     * - end {Number} Meaning end (required)
+                     * - type {String} Meaning type
+                     * - description {String} Meaning description
+                     * - text {String} Text of the meaning
+                     * - editing {Boolean} Editing or not
+                     */
+                    function showMeaningModal(meaningData) {
+                        if(!meaningData) {
+                            console.error('Cannot launch modal - blank meaningData!');
+                            return;
+                        }
+
                         return $modal.open({
                             templateUrl: '/views/meaning/_meaning_modal.html'
                             ,backdrop: false
-                            ,controller: controller
+                            ,controller: ['$scope', '$modalInstance', function($modalScope, $modalInstance) {
+                                //Set ALL THE DATAS
+                                $modalScope.model = {};
+                                $modalScope.model.LyricId = $scope.model.id;
+                                $modalScope.model.start = meaningData.start;
+                                $modalScope.model.end = meaningData.end;
+
+                                //This is for display reference only - not saved with the meaning
+                                $modalScope.meaningText = meaningData.text;
+
+                                //Flag as editing if we need to
+                                if(meaningData.editing) {
+                                    $modalScope.editingMeaning = true;
+
+                                    //Stash existing data on the editing model
+                                    $modalScope.model.type = meaningData.type;
+                                    $modalScope.model.description = meaningData.description;
+                                }
+
+                                $modalScope.onSubmit = function() {
+                                    window.getSelection().removeAllRanges();
+
+                                    //Stash and render the Meaning
+                                    var newMeaning = angular.copy($modalScope.model);
+                                    if(!$scope.model.meanings) {
+                                        $scope.model.meanings = [ newMeaning ];
+                                    } else {
+                                        $scope.model.meanings.push(newMeaning);
+                                    }
+
+                                    try {
+                                        //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                        //       but seems benign
+                                        $modalInstance.dismiss();
+                                    } catch(e) {
+                                        //Do nothing
+                                    }
+                                };
+
+                                $modalScope.onCancel = function() {
+                                    window.getSelection().removeAllRanges();
+
+                                    try {
+                                        //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                        //       but seems benign
+                                        $modalInstance.dismiss();
+                                    } catch(e) {
+                                        //Do nothing
+                                    }
+                                };
+
+                                $modalScope.delete = function() {
+                                    //Remove old meaning
+                                    var index = findMeaning(oldMeaning);
+
+                                    if(index !== -1) {
+                                        $scope.model.meanings.splice(index, 1);
+
+                                        window.getSelection().removeAllRanges();
+
+                                        try {
+                                            //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
+                                            //       but seems benign
+                                            $modalInstance.dismiss();
+                                        } catch(e) {
+                                            //Do nothing
+                                        }
+                                    } else {
+                                        console.error('Could not remove old meaning when deleting!');
+                                    }
+                                };
+
+                                $modalScope.typeClicked = function(element) {
+                                    $modalScope.model.type = element.target.value;
+                                };
+                            }]
                         });
                     }
 
@@ -350,52 +441,12 @@ define(['angular'], function(angular) {
                             }
 
                             //Create a modal to create the meaning
-                            var modal = showMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
-                                //This is for display reference only - not saved with the meaning
-                                $modalScope.meaningText = range.toString().replace(/^[\r\n]+|\.|[\r\n]+$/g, "").trim();
-
-                                //Set all the things we already know on the modal's model
-                                $modalScope.model = $modalScope.model || {};
-                                $modalScope.model.start = start;
-                                $modalScope.model.end = end;
-                                $modalScope.model.LyricId = $scope.model.id;
-
-                                $modalScope.onSubmit = function() {
-                                    window.getSelection().removeAllRanges();
-
-                                    //Stash and render the Meaning
-                                    var newMeaning = angular.copy($modalScope.model);
-                                    if(!$scope.model.meanings) {
-                                        $scope.model.meanings = [ newMeaning ];
-                                    } else {
-                                        $scope.model.meanings.push(newMeaning);
-                                    }
-
-                                    try {
-                                        //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                        //       but seems benign
-                                        $modalInstance.dismiss();
-                                    } catch(e) {
-                                        //Do nothing
-                                    }
-                                };
-
-                                $modalScope.onCancel = function() {
-                                    window.getSelection().removeAllRanges();
-                                    
-                                    try {
-                                        //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                        //       but seems benign
-                                        $modalInstance.dismiss();
-                                    } catch(e) {
-                                        //Do nothing
-                                    }
-                                };
-
-                                $modalScope.typeClicked = function(element) {
-                                    $modalScope.model.type = element.target.value;
-                                }
-                            }]);
+                            showMeaningModal({
+                                editing: false
+                                ,start: start
+                                ,end: end
+                                ,text: range.toString().trim()
+                            });
                         }
                     }
 
@@ -415,100 +466,19 @@ define(['angular'], function(angular) {
 
                     $scope.editorMousedown = function() {
                         $scope.editorDrag = true;
-                    }
+                    };
 
                     $scope.meaningClick = function($event) {
-                        var modal = showMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
-                            var eventEl = angular.element($event.currentTarget)
-                                ,oldMeaning = {
-                                    type: eventEl.attr('data-type')
-                                    ,start: eventEl.attr('data-start')
-                                    ,end: eventEl.attr('data-end')
-                                    ,description: eventEl.attr('data-description')
-                                };
+                        var eventEl = angular.element($event.currentTarget);
 
-                            //Flag as editing
-                            $modalScope.editingMeaning = true;
-
-                            //Stash existing data on the editing model
-                            $modalScope.meaningText = eventEl.text().trim();
-                            $modalScope.model = {};
-                            $modalScope.model.type = oldMeaning.type;
-                            $modalScope.model.start = oldMeaning.start;
-                            $modalScope.model.end = oldMeaning.end;
-                            $modalScope.model.description = oldMeaning.description;
-
-                            $modalScope.toolClick = function(type) {
-                                $modalScope.model.type = type;
-                            };
-
-                            $modalScope.onSubmit = function() {
-                                window.getSelection().removeAllRanges();
-
-                                //Stash and render the Meaning
-                                var newMeaning = angular.copy($modalScope.model);
-                                if(!$scope.model.meanings) {
-                                    $scope.model.meanings = [ newMeaning ];
-                                } else {
-                                    //Remove old meaning
-                                    var index = findMeaning(oldMeaning);
-
-                                    if(index !== -1) {
-                                        $scope.model.meanings.splice(index, 1);
-
-                                        //Insert new meaning
-                                        $scope.model.meanings.push(newMeaning);
-                                    } else {
-                                        console.error('Could not remove old meaning when editing!');
-                                    }
-                                }
-
-                                try {
-                                    //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                    //       but seems benign
-                                    $modalInstance.dismiss();
-                                } catch(e) {
-                                    //Do nothing
-                                }
-                            };
-
-                            $modalScope.onCancel = function() {
-                                window.getSelection().removeAllRanges();
-                                
-                                try {
-                                    //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                    //       but seems benign
-                                    $modalInstance.dismiss();
-                                } catch(e) {
-                                    //Do nothing
-                                }
-                            };
-
-                            $modalScope.delete = function() {
-                                //Remove old meaning
-                                var index = findMeaning(oldMeaning);
-
-                                if(index !== -1) {
-                                    $scope.model.meanings.splice(index, 1);
-
-                                    window.getSelection().removeAllRanges();
-
-                                    try {
-                                        //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                        //       but seems benign
-                                        $modalInstance.dismiss();
-                                    } catch(e) {
-                                        //Do nothing
-                                    }
-                                } else {
-                                    console.error('Could not remove old meaning when deleting!');
-                                }
-                            };
-
-                            $modalScope.typeClicked = function(element) {
-                                $modalScope.model.type = element.target.value;
-                            }
-                        }]);
+                        showMeaningModal({
+                            editing: true
+                            ,start: eventEl.attr('data-start')
+                            ,end: eventEl.attr('data-end')
+                            ,text: eventEl.text().trim()
+                            ,type: eventEl.attr('data-type')
+                            ,description: eventEl.attr('data-description')
+                        });
                     };
                 }
             };
