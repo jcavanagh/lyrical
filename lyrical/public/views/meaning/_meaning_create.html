@@ -5,8 +5,41 @@
     <div class="modal-body">
         <form class="form-horizontal" role="form">
             <div class="form-group">
+                <label>You selected:</label>
+                <div class="container" style="white-space: pre-line">
+                    {{ meaningText }}
+                </div>
+            </div>
+            <div class="form-group">
+                <label>How important is it?</label>
                 <div class="container">
-                    You selected: {{ meaningText }}
+                    <div class="btn-group">
+                        <button
+                            type="button" class="btn btn-success"
+                            ng-click="typeClicked($event)"
+                            ng-class="{ active: model.type == lyric-super-important }"
+                            value="lyric-super-important">Super</button>
+                        <button
+                            type="button" class="btn btn-primary"
+                            ng-click="typeClicked($event)"
+                            ng-class="{ active: model.type == lyric-important }"
+                            value="lyric-important">Really</button>
+                        <button
+                            type="button" class="btn btn-info"
+                            ng-click="typeClicked($event)"
+                            ng-class="{ active: model.type == lyric-neutral }"
+                            value="lyric-neutral">Kinda</button>
+                        <button
+                            type="button" class="btn btn-warning"
+                            ng-click="typeClicked($event)"
+                            ng-class="{ active: model.type == lyric-unimportant }"
+                            value="lyric-unimportant">Not really</button>
+                        <button
+                            type="button" class="btn btn-danger"
+                            ng-click="typeClicked($event)"
+                            ng-class="{ active: model.type == lyric-irrelevant }"
+                            value="lyric-irrelevant">Not at all</button>
+                    </div>
                 </div>
             </div>
             <div class="form-group">
@@ -17,6 +50,6 @@
     </div>
     <div class="modal-footer">
         <button class="btn btn-primary" ng-click="onSubmit()">Insert</button>
-        <button class="btn btn-warning" ng-click="onCancel()">Cancel</button>
+        <button class="btn btn-default" ng-click="onCancel()">Cancel</button>
     </div>
 </div>

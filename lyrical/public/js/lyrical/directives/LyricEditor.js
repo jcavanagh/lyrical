@@ -328,7 +328,7 @@ define(['angular'], function(angular) {
                             //Create a modal to create the meaning
                             var modal = showCreateMeaningModal(['$scope', '$modalInstance', function($modalScope, $modalInstance) {
                                 //This is for display reference only - not saved with the meaning
-                                $modalScope.meaningText = range.toString();
+                                $modalScope.meaningText = range.toString().replace(/^[\r\n]+|\.|[\r\n]+$/g, "").trim();
 
                                 //Set all the things we already know on the modal's model
                                 $modalScope.model = $modalScope.model || {};
@@ -367,6 +367,10 @@ define(['angular'], function(angular) {
                                         //Do nothing
                                     }
                                 };
+
+                                $modalScope.typeClicked = function(element) {
+                                    $modalScope.model.type = element.target.value;
+                                }
                             }]);
                         }
                     }
@@ -392,7 +396,7 @@ define(['angular'], function(angular) {
                                 };
 
                             //Stash existing data on the editing model
-                            $modalScope.meaningText = eventEl.text();
+                            $modalScope.meaningText = eventEl.text().trim();
                             $modalScope.model = {};
                             $modalScope.model.type = oldMeaning.type;
                             $modalScope.model.start = oldMeaning.start;
