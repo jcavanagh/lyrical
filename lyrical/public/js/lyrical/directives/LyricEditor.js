@@ -89,35 +89,6 @@ define(['angular'], function(angular) {
                         });
                     }
 
-                    //Returns a list of all meanings in the current editor view
-                    function getMeanings() {
-                        var editorEl = getEditorEl()
-                            ,meanings = [];
-
-                        if(editorEl) {
-                            var children = editorEl.children();
-
-                            for(var x = 0; x < children.length; x++) {
-                                var el = children[x],
-                                    start = parseInt(el.getAttribute('data-start'), 10),
-                                    end = parseInt(el.getAttribute('data-end'), 10),
-                                    description = el.getAttribute('data-description'),
-                                    type = el.getAttribute('data-type');
-
-                                meanings.push({
-                                    start: start,
-                                    end: end,
-                                    description: description,
-                                    type: type
-                                });
-                            }
-                        } else {
-                            console.error('Could not find lyric editor element!');
-                        }
-
-                        return meanings;
-                    }
-
                     function insertMeanings(meanings) {
                         //Returns the next sibling for an jQuery node, respecting text nodes as real things
                         function getNextSibling(node) {
@@ -226,7 +197,7 @@ define(['angular'], function(angular) {
                         if(meanings && meanings.length) {
                             insertMeanings(meanings);
                         } else {
-                            console.log('Not inserting null meanings');
+                            removeAllMeanings(getEditorEl());
                         }
                     });
                 },
@@ -267,8 +238,6 @@ define(['angular'], function(angular) {
                             ,controller: ['$scope', '$modalInstance', function($modalScope, $modalInstance) {
                                 //Set ALL THE DATAS
                                 $modalScope.model = {};
-                                //FIXME: I probably don't have to do this here
-                                // $modalScope.model.LyricId = $scope.model.id;
                                 $modalScope.model.start = meaningData.start;
                                 $modalScope.model.end = meaningData.end;
 
@@ -320,7 +289,15 @@ define(['angular'], function(angular) {
                                 };
 
                                 $modalScope.delete = function() {
+                                    //Find and remove this meaning
+                                    $scope.model.meanings = $scope.model.meanings.filter(function(item) {
+                                        return !(item.start == $modalScope.model.start && item.end == $modalScope.model.end);
+                                    });
+
+                                    //Save new meaning collection
                                     saveMeanings();
+
+                                    $modalScope.onCancel();
                                 };
 
                                 $modalScope.typeClicked = function(element) {
