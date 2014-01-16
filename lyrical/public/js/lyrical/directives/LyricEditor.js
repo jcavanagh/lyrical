@@ -140,7 +140,6 @@ define(['angular'], function(angular) {
                                 ,currentMeaning = 0
                                 ,meaning = meanings[currentMeaning];
 
-                            debugger;
                             while(node && currentMeaning < meanings.length) {
                                 //If it's a text node
                                 if(node.context.nodeType === 3) {
@@ -149,7 +148,6 @@ define(['angular'], function(angular) {
                                         for(var y = 0; y < node.text().length; y++) {
                                             //Found the start!
                                             if(lyricOffset == meaning.start) {
-                                                debugger;
                                                 //Create the start node
                                                 var meaningNode = angular.element('<span ' +
                                                                 'ng-click="meaningClick($event)" ' +
@@ -185,7 +183,6 @@ define(['angular'], function(angular) {
                                                 break;
                                             } else if(y === node.text().length - 1) {
                                                 //If this is the last character, and we don't have a lyric start, then go to the next node
-                                                debugger;
                                                 node = getNextSibling(node);
                                             }
 
@@ -194,7 +191,6 @@ define(['angular'], function(angular) {
                                         }
                                     } else {
                                         //Blank text node, skip it
-                                        debugger;
                                         node = getNextSibling(node);
                                     }
                                 } else {
@@ -234,10 +230,18 @@ define(['angular'], function(angular) {
                         }
                     });
                 },
-                controller: function($scope, $modal, $element) {
+                controller: function($scope, $modal, $element, LoadingStatus) {
                     //Helpers
                     function resetDrag() {
                         window.getSelection().removeAllRanges();
+                    }
+
+                    function saveMeanings() {
+                        LoadingStatus.setSaving(true);
+
+                        $scope.model.$update().then(function() {
+                            LoadingStatus.setSaving(false);
+                        });
                     }
 
                     /**
@@ -263,7 +267,8 @@ define(['angular'], function(angular) {
                             ,controller: ['$scope', '$modalInstance', function($modalScope, $modalInstance) {
                                 //Set ALL THE DATAS
                                 $modalScope.model = {};
-                                $modalScope.model.LyricId = $scope.model.id;
+                                //FIXME: I probably don't have to do this here
+                                // $modalScope.model.LyricId = $scope.model.id;
                                 $modalScope.model.start = meaningData.start;
                                 $modalScope.model.end = meaningData.end;
 
@@ -276,7 +281,7 @@ define(['angular'], function(angular) {
 
                                     //Stash existing data on the editing model
                                     $modalScope.model.type = meaningData.type;
-                                    $modalScope.model.description = meaningData.description;
+                                    $modalScope.model.description = meaningData.description || '';
                                 }
 
                                 $modalScope.onSubmit = function() {
@@ -289,6 +294,9 @@ define(['angular'], function(angular) {
                                     } else {
                                         $scope.model.meanings.push(newMeaning);
                                     }
+
+                                    //Save the new meanings to the backend
+                                    saveMeanings();
 
                                     try {
                                         //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
@@ -312,24 +320,7 @@ define(['angular'], function(angular) {
                                 };
 
                                 $modalScope.delete = function() {
-                                    //Remove old meaning
-                                    var index = findMeaning(oldMeaning);
-
-                                    if(index !== -1) {
-                                        $scope.model.meanings.splice(index, 1);
-
-                                        window.getSelection().removeAllRanges();
-
-                                        try {
-                                            //FIXME: ui-boostrap's modals are kind of broke, and this call always throws
-                                            //       but seems benign
-                                            $modalInstance.dismiss();
-                                        } catch(e) {
-                                            //Do nothing
-                                        }
-                                    } else {
-                                        console.error('Could not remove old meaning when deleting!');
-                                    }
+                                    saveMeanings();
                                 };
 
                                 $modalScope.typeClicked = function(element) {
@@ -337,22 +328,6 @@ define(['angular'], function(angular) {
                                 };
                             }]
                         });
-                    }
-
-                    function findMeaning(newMeaning) {
-                        if(newMeaning) {
-                            if($scope.model && $scope.model.meanings) {
-                                for(var x in $scope.model.meanings) {
-                                    var meaning = $scope.model.meanings[x];
-
-                                    if(newMeaning.start == meaning.start && newMeaning.end == meaning.end) {
-                                        return x;
-                                    }
-                                }
-                            }
-                        }
-
-                        return -1;
                     }
 
                     function intersectsMeaning(start, end) {

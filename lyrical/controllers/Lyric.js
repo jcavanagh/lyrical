@@ -50,12 +50,16 @@ define(['sequelize', 'models/Lyric', 'models/Meaning'], function(Sequelize, Lyri
             var chainer = new Sequelize.Utils.QueryChainer();
 
             //Replace all previously associated meanings
-            chainer.add( Meaning.model.destroy({ LyricId: req.params.id }) );
+            chainer.add( Meaning.model, 'destroy', [{ LyricId: req.params.id }]);
 
             var meaningsToCreate = req.body.meanings;
             if(meaningsToCreate && meaningsToCreate.length) {
                 for (var x = 0; x < meaningsToCreate.length; x++) {
-                    chainer.add( Meaning.model.create(req.body.meanings[x]) );
+                    //Get the IDs right
+                    delete req.body.meanings[x].id;
+                    req.body.meanings[x].LyricId = req.params.id;
+
+                    chainer.add( Meaning.model, 'create', [ req.body.meanings[x] ]);
                 }
             }
 
@@ -63,24 +67,12 @@ define(['sequelize', 'models/Lyric', 'models/Meaning'], function(Sequelize, Lyri
             delete req.body.meanings;
 
             //Update lyric
-            chainer.add( Lyric.model.update(req.body, { id: req.params.id }) );
+            chainer.add( Lyric.model, 'update', [ req.body, { id: req.params.id } ]);
 
-            chainer.run().success(function(results) {
-                //First result is destroying old Meanings
-                //Last result is update Lyric
-                //Rest are new Meanings
-                var newMeanings = [];
-                for(var x = 1; x < results.length; x++) {
-                    //Stash all but the last, loop starts at one
-                    if(x < results.length - 1) {
-                        newMeanings.push(results[x]);
-                    }
-                }
-
-                //Associate meanings to updated lyric
-                Lyric.model.find(req.params.id).success(function(lyric) {
-                    lyric.setMeanings(newMeanings);
-                    res.status(200).json({})
+            chainer.runSerially().success(function() {
+                //Find and return the lyric
+                Lyric.model.find({ where: { id: req.params.id }, include: [ Meaning.model] }).success(function(lyric) {
+                    res.status(200).json(lyric);
                 }).error(function(error) {
                     console.error('Error associating lyric meanings:', error, error.stack);
                     res.status(500).json(error);
