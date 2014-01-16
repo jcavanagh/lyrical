@@ -7,6 +7,8 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  */
 define([
     'lyrical/controllers/Lyric',
+    'lyrical/controllers/LoadingStatus',
+    'lyrical/controllers/Meaning',
     'lyrical/controllers/Playlist'
 ], function() {
     'use strict';

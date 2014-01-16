@@ -6,6 +6,7 @@ if (typeof define !== 'function') { var define = require('amdefine')(module); }
  * @author Joe Cavanagh
  */
 define([
+    'lyrical/services/LoadingStatus',
     'lyrical/services/utils'
 ], function() {
     'use strict';

@@ -1,4 +1,16 @@
 <div class="navbar navbar-fixed-bottom navbar-inverse">
+    <ul class="nav navbar-nav navbar-left" ng-controller="LoadingStatusCtl">
+        <li ng-show="saving">
+            <!-- margin-bottom is here to make it fit the navbar properly, and not expand it vertically -->
+            <div class="navbar-text progress progress-striped active" style="width:50px; margin-bottom: 0px">
+                <div class="progress-bar" role="progressbar" style="width: 100%">
+                </div>
+            </div>
+            <div class="navbar-text" style='margin-left: -5px'>
+                Saving...
+            </div>
+        </li>
+    </ul>
     <ul class="nav navbar-nav navbar-right">
         <li>
             <a class="navbar-link" href="https://github.com/jcavanagh/lyrical">
