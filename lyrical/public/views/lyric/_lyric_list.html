@@ -15,16 +15,18 @@
                 <tr>
                     <th>Title</th>
                     <th>Description</th>
-                    <th>SoundCloud</th>
-                    <th>YouTube</th>
                 </tr>
             </thead>
             <tbody>
                 <tr ng-repeat="lyric in lyrics" ng-click="select(lyric);">
                     <td>{{ lyric.title }}</td>
                     <td>{{ lyric.description }}</td>
-                    <td>{{ lyric.soundcloudUrl }}</td>
-                    <td>{{ lyric.youtubeUrl }}</td>
+                    <td ng-show="lyric.soundcloudUrl"><a href="{{ lyric.soundcloudUrl }}">
+                        <img src="/images/soundcloud.png" style="width: 40px; height: 40px"></img>
+                    </a></td>
+                    <td ng-show="lyric.youtubeUrl"><a href="{{ lyric.youtubeUrl }}">
+                        <img src="/images/youtube-stacked.png" style="width: 40px; height: 40px"></img>
+                    </a></td>
                 </tr>
             </tbody>
         </table>
