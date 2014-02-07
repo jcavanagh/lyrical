@@ -14,5 +14,13 @@
                 </a>
             </li>
         </ul>
+        <ul ng-controller="AuthCtl" class="nav navbar-nav navbar-right" style="margin-right: 5px">
+            <li ng-hide="authenticated">
+                <button type="button" class="btn btn-primary navbar-btn" ng-click="login()">Login</button>
+            </li>
+            <li ng-show="authenticated">
+                <button type="button" class="btn btn-default navbar-btn" ng-click="logout()">Logout</button>
+            </li>
+        </ul>
     </div>
 </nav>

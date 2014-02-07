@@ -25,9 +25,14 @@ define([
         'lyrical.services',
         'lyrical.resources'
     ]).config(function($routeProvider, $locationProvider) {
-        //Index routes
+        //Index route
         $routeProvider.when('/', {
             templateUrl: '/views/_home.html'
+        });
+
+        //Auth routes
+        $routeProvider.when('/login', {
+            templateUrl: '/views/auth/_login.html'
         });
 
         //Lyric routes

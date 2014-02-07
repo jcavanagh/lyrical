@@ -1,0 +1,11 @@
+.login-google {
+    background-image: '/images/gplus.png';
+
+    &:hover {
+        background-image: '/images/gplus-hover.png';
+    }
+
+    &:active {
+        background-image: '/images/gplus-press.png';
+    }
+}

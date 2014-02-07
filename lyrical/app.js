@@ -12,6 +12,7 @@ define([
     'events',
     'express',
     'http',
+    'passport',
     'path',
     'underscore.string'
 ], function(
@@ -21,6 +22,7 @@ define([
     events,
     express,
     http,
+    passport,
     path,
     underscoreStr
 ) {
@@ -74,54 +76,113 @@ define([
                             next();
                         })
                         .use(express.methodOverride())
-                        .use(app.router)
                         .use(express.static(path.join(__dirname, 'public')))
                         .use(express.cookieParser(Config.get('lyrical.server.cookieSecret')))
                         .use(express.session({
                             secret: Config.get('lyrical.server.sessionSecret')
-                        }));
+                        }))
+                        .use(passport.initialize())
+                        .use(passport.session())
+                        .use(app.router);
 
-                    //Set routes
-                    //Controllers require models, so need to be loaded here
-                    //after ORM initialization
                     require([
-                        'controllers/index',
-                        'controllers/Lyric',
-                        'controllers/Meaning',
-                        'controllers/Playlist',
-                        'controllers/PlaylistLyric'
-                    ], function(index, Lyric, Meaning, Playlist, PlaylistLyric) {
-                        //Index
-                        app.get('/', index.index);
+                        'models/User'
+                    ], function(User) {
+                        //Configure authentation strategies
 
-                        //Lyric
-                        app.get('/api/lyrics', Lyric.index);
-                        app.get('/api/lyrics/:id', Lyric.get);
-                        app.post('/api/lyrics', Lyric.post);
-                        app.put('/api/lyrics/:id', Lyric.put);
-                        app.delete('/api/lyrics/:id', Lyric.delete);
 
-                        //Meaning
-                        app.get('/api/meanings', Meaning.index);
-                        app.get('/api/meanings/:id', Meaning.get);
-                        app.post('/api/meanings', Meaning.post);
-                        app.put('/api/meanings/:id', Meaning.put);
-                        app.delete('/api/meanings/:id', Meaning.delete);
+                        //Configure authentication user storage
+                        passport.serializeUser(function(user, done) {
+                            done(null, user.id);
+                        });
 
-                        //Playlist
-                        app.get('/api/playlists', Playlist.index);
-                        app.get('/api/playlists/:id', Playlist.get);
-                        app.post('/api/playlists', Playlist.post);
-                        app.put('/api/playlists/:id', Playlist.put);
-                        app.delete('/api/playlists/:id', Playlist.delete);
+                        passport.deserializeUser(function(id, done) {
+                            User.model.find(id, function(user){
+                                done(null, user);
+                            });
+                        });
 
-                        //PlaylistLyric
-                        app.post('/api/playlists/:playlistId/lyric/:lyricId', PlaylistLyric.post);
-                        app.delete('/api/playlists/:playlistId/lyric/:lyricId', PlaylistLyric.delete);
+                        //Set routes
+                        //Controllers require models, so need to be loaded here
+                        //after ORM initialization
+                        require([
+                            'controllers/index',
+                            'controllers/Auth',
+                            'controllers/Lyric',
+                            'controllers/Meaning',
+                            'controllers/Playlist',
+                            'controllers/PlaylistLyric'
+                        ], function(index, Auth, Lyric, Meaning, Playlist, PlaylistLyric) {
+                            //Authenticated routes helper
+                            function authenticated(req, res, next) {
+                                if (req.isAuthenticated()) {
+                                    return next();
+                                } else {
+                                    res.redirect('/login');
+                                }
+                            }
 
-                        //Start server
-                        http.createServer(app).listen(app.get('port'), function(){
-                            console.log('Express server listening on port ' + app.get('port'));
+                            //Index
+                            app.get('/', index.index);
+
+                            //Auth
+                            app.get('/login', Auth.login);
+                            app.get('/logout', Auth.logout);
+
+                            app.get('/auth/google', passport.authenticate('google'));
+                            app.get('/auth/google/callback', 
+                                passport.authenticate('google', { successRedirect: '/', failureRedirect: '/' })
+                            );
+
+                            // app.get('/auth/facebook', passport.authenticate('facebook'));
+                            // app.get('/auth/facebook/callback', 
+                            //     passport.authenticate('facebook', { successRedirect: '/', failureRedirect: '/' })
+                            // );
+
+                            // app.get('/auth/twitter', passport.authenticate('twitter'));
+                            // app.get('/auth/twitter/callback', 
+                            //     passport.authenticate('twitter', { successRedirect: '/', failureRedirect: '/' })
+                            // );
+
+                            // app.get('/auth/soundcloud', passport.authenticate('soundcloud'));
+                            // app.get('/auth/soundcloud/callback', 
+                            //     passport.authenticate('soundcloud', { successRedirect: '/', failureRedirect: '/' })
+                            // );
+
+                            // app.get('/auth/youtube', passport.authenticate('youtube'));
+                            // app.get('/auth/youtube/callback', 
+                            //     passport.authenticate('youtube', { successRedirect: '/', failureRedirect: '/' })
+                            // );
+
+                            //Lyric
+                            app.get('/api/lyrics', authenticated, Lyric.index);
+                            app.get('/api/lyrics/:id', authenticated, Lyric.get);
+                            app.post('/api/lyrics', authenticated, Lyric.post);
+                            app.put('/api/lyrics/:id', authenticated, Lyric.put);
+                            app.delete('/api/lyrics/:id', authenticated, Lyric.delete);
+
+                            //Meaning
+                            app.get('/api/meanings', authenticated, Meaning.index);
+                            app.get('/api/meanings/:id', authenticated, Meaning.get);
+                            app.post('/api/meanings', authenticated, Meaning.post);
+                            app.put('/api/meanings/:id', authenticated, Meaning.put);
+                            app.delete('/api/meanings/:id', authenticated, Meaning.delete);
+
+                            //Playlist
+                            app.get('/api/playlists', authenticated, Playlist.index);
+                            app.get('/api/playlists/:id', authenticated, Playlist.get);
+                            app.post('/api/playlists', authenticated, Playlist.post);
+                            app.put('/api/playlists/:id', authenticated, Playlist.put);
+                            app.delete('/api/playlists/:id', authenticated, Playlist.delete);
+
+                            //PlaylistLyric
+                            app.post('/api/playlists/:playlistId/lyric/:lyricId', authenticated, PlaylistLyric.post);
+                            app.delete('/api/playlists/:playlistId/lyric/:lyricId', authenticated, PlaylistLyric.delete);
+
+                            //Start server
+                            http.createServer(app).listen(app.get('port'), function(){
+                                console.log('Express server listening on port ' + app.get('port'));
+                            });
                         });
                     });
                 }).error(function(error) {
